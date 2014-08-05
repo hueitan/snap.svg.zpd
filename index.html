@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>A zoom/pan/drag plugin for Snap.svg</title>
+    <style>
+        html, body { margin:0; padding:0; overflow:hidden }
+        svg { position:fixed; top:0; left:0; height:100%; width:100% }
+    </style>
+
+    <script src="./lib/snap.svg.js"></script>
+    <script src="./snap.svg.zpd.js"></script>
+</head>
+<body>
+
+<script>
+    var paper = Snap();
+    var bigCircle = paper.circle(150, 150, 100);
+    var circle2 = paper.circle(200, 200, 100).attr({fill: 'green'});
+
+    // paper.g(bigCircle, circle2); // group <g>
+    /*
+    Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
+        var s = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        s.appendChild(data.node);
+        paper.append(s);
+        paper.zpd();
+    });
+    */
+
+    paper.zpd();
+    // settings
+    // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
+    // paper.zpd(function (err, paper) { console.log(paper); });
+    // paper.zpd({ zoom: false }, function (err, paper) { console.log(paper); });
+
+</script>
+</body>
+
+</html>

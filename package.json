@@ -1,0 +1,28 @@
+{
+  "name": "snap.svg.zpd",
+  "version": "0.0.5",
+  "description": "A zoom/pan/drag plugin for Snap.svg",
+  "main": "snap.svg.zpd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/huei90/snap.svg.zpd"
+  },
+  "keywords": [
+    "snapsvg",
+    "zoom",
+    "pan",
+    "drag",
+    "snap.svg",
+    "snap.svg",
+    "plugin"
+  ],
+  "author": "Huei Tan",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/huei90/snap.svg.zpd/issues"
+  },
+  "homepage": "https://github.com/huei90/snap.svg.zpd"
+}

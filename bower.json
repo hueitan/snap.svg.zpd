@@ -1,0 +1,27 @@
+{
+  "name": "snap.svg.zpd",
+  "main": "snap.svg.zpd.js",
+  "version": "0.0.5",
+  "homepage": "https://github.com/huei90/snap.svg.zpd",
+  "authors": [
+    "Huei <huei90@gmail.com>"
+  ],
+  "description": "A zoom/pan/drag plugin for Snap.svg",
+  "keywords": [
+    "snapsvg",
+    "zoom",
+    "pan",
+    "drag",
+    "snap.svg",
+    "snap.svg plugin"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/bower_components",
+    "test",
+    "tests"
+  ]
+}
