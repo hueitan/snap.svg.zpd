@@ -52,6 +52,7 @@
 
             var me = this,
                 root = me.node, // get paper svg
+                gElem = this.g(), // Snapsvg Element
                 rootChildNodes = me.node.childNodes, // []
                 preUniqueId = 'snapsvgzpd-',
                 state = 'none',
@@ -61,9 +62,9 @@
                 stateTf;
 
             /**
-             * add paper nodes into <g> element
+             * add paper nodes into <g> element (Snapsvg Element)
              * and give the nodes an unique id like 'snapsvg-zpd-12345'
-             *
+             * and
              * <svg>
              *     <def>something</def>
              *     <circle cx="10" cy="10" r="100"></circle>
@@ -78,17 +79,18 @@
              *     </g>
              * </svg>
              */
-            me.gelem = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            me.gelem.id = preUniqueId + me.id; // me.gelem.setAttribute('data-snapsvg-zpd-id', me.id);
-            root.appendChild(me.gelem);
             (function () {
-                var index = 0;
+                var index = 0,
+                    gNode = gElem.node;
+
+                gNode.id = preUniqueId + me.id;
+
                 while (rootChildNodes.length - 1 > index) { // length -1 because the <g> element
                     if (!rootChildNodes[index]) {
                         index++;
                         continue;
                     }
-                    me.gelem.appendChild(rootChildNodes[index]);
+                    gNode.appendChild(rootChildNodes[index]);
                 }
             })();
 
