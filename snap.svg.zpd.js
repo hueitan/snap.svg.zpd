@@ -48,13 +48,25 @@
 (function (Snap) {
     Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
 
+        var preUniqueId = 'snapsvgzpd-';
+
+        var gelem = {}; // global get <g> Element
+
+        /**
+         * Sets the current transform matrix of an element.
+         */
+        var setCTM = function (element, matrix) {
+            var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+
+            element.setAttribute("transform", s);
+        };
+
         var zpd = function (options, cb) {
 
             var me = this,
                 root = me.node, // get paper svg
-                gElem = this.g(), // Snapsvg Element
+                gElem = me.g(), // Snapsvg Element
                 rootChildNodes = me.node.childNodes, // []
-                preUniqueId = 'snapsvgzpd-',
                 state = 'none',
                 svgRoot = null,
                 stateTarget,
@@ -64,6 +76,7 @@
             /**
              * add paper nodes into <g> element (Snapsvg Element)
              * and give the nodes an unique id like 'snapsvg-zpd-12345'
+             * and let this <g> Element to global gelem[this.id]
              * and
              * <svg>
              *     <def>something</def>
@@ -84,6 +97,8 @@
                     gNode = gElem.node;
 
                 gNode.id = preUniqueId + me.id;
+
+                gelem[me.id] = gElem;
 
                 while (rootChildNodes.length - 1 > index) { // length -1 because the <g> element
                     if (!rootChildNodes[index]) {
@@ -143,15 +158,6 @@
                 p.y = evt.clientY;
 
                 return p;
-            }
-
-            /**
-             * Sets the current transform matrix of an element.
-             */
-            function setCTM(element, matrix) {
-                var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-
-                element.setAttribute("transform", s);
             }
 
             /**
@@ -267,7 +273,6 @@
                     state = 'drag';
 
                     stateTarget = evt.target;
-                    console.log(evt)
 
                     stateTf = g.getCTM().inverse();
 
@@ -293,14 +298,36 @@
             }
 
             setupHandlers();
-        }
+        };
+
+
+        var zoomTo = function (zoom, interval, ease, cb) {
+
+            if (zoom < 0 || typeof zoom !== 'number') {
+                console.error('zoomTo(arg) should be a number and greater than 0')
+                return;
+            }
+
+            var me = this,
+                thisGElem = gelem[me.id];
+
+            if (typeof interval !== 'number') {
+                interval = 3000;
+            }
+
+            thisGElem.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
+                if (cb) {
+                    cb(null, thisGElem)
+                }
+            });
+
+        };
 
         Paper.prototype.zpd = zpd;
-
+        Paper.prototype.zoomTo = zoomTo;
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
         // Element.prototype.panTo = panTo; // arg (x, y, ease, interval, cb)
-        // Element.prototype.zoomTo = zoomTo; // arg (zoom, ease, interval, cb) - center
 
         /** rotate => snap.svg.zpdr **/
 

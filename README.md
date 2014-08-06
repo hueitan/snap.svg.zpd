@@ -46,14 +46,25 @@ paper.zpd(function (err, paper) {
 
     true or false: enable or disable panning (default true)
 
-### pad
+#### pad
 
     true or false: enable or disable zooming (default true)
 
-### drag
+#### drag
 
     true or false: enable or disable dragging (default false)
 
-### zoomScale
+#### zoomScale
 
     number: Zoom sensitivity (default 0.2)
+
+### More
+
+#### zoomTo
+
+```js
+paper.zoomTo(1.5, 3000, mina.bounce, function (err, paper) {
+    console.log(paper);
+});
+```
+    zoom (must > 0), interval (ms optional), mina (optional), callback (optional)
