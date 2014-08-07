@@ -9,6 +9,9 @@
     <style>
         html, body { margin:0; padding:0; overflow:hidden }
         svg { position:fixed; top:0; left:0; height:100%; width:100% }
+        .dragText {
+            font-size: 100px;
+        }
     </style>
 
     <script src="./lib/snap.svg.js"></script>
@@ -18,10 +21,12 @@
 
 <script>
     var paper = Snap();
-    var bigCircle = paper.circle(150, 150, 100);
-    var circle2 = paper.circle(200, 200, 100).attr({fill: 'green'});
 
-    // paper.g(bigCircle, circle2); // group <g>
+    var image1 = paper.image('./lib/image1.png',820,270);
+    var image2 = paper.image('./lib/image2.png',100,220, 500,205);
+    var image3 = paper.image('./lib/image3.png',500,100, 400,332.5);
+    var text = paper.text(50, 100, 'drag me').addClass('dragText');
+
     /*
     Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
         var s = document.createElementNS('http://www.w3.org/2000/svg', 'g');

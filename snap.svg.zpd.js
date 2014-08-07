@@ -99,6 +99,7 @@
                 gNode.id = preUniqueId + me.id;
 
                 gelem[me.id] = gElem;
+                gelem[me.id].transform('matrix'); // get <g transform="matrix(1,0,0,1,0,0)">
 
                 while (rootChildNodes.length - 1 > index) { // length -1 because the <g> element
                     if (!rootChildNodes[index]) {
@@ -132,17 +133,24 @@
 
             /**
              * Register handlers
+             * desktop and mobile (?)
              */
             function setupHandlers() {
 
-                root.onmouseup = handleMouseUp;
-                root.onmousedown = handleMouseDown;
-                root.onmousemove = handleMouseMove;
+                // mobile
+                // (?)
+                
+                // desktop
+                if ('onmouseup' in document.documentElement) {
+                    root.onmouseup = handleMouseUp;
+                    root.onmousedown = handleMouseDown;
+                    root.onmousemove = handleMouseMove;
 
-                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
-                    root.addEventListener('mousewheel', handleMouseWheel, false); // Chrome/Safari
-                else
-                    root.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
+                    if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
+                        root.addEventListener('mousewheel', handleMouseWheel, false); // Chrome/Safari
+                    else
+                        root.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
+                }
 
                 // callback
                 if (cb) cb(null, me);
