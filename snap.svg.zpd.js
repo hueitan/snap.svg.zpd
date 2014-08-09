@@ -14,6 +14,16 @@
  * // or callback
  * paper.zpd(function (err, paper) { });
  *
+ *  Notice
+ * ========
+ * This usually use on present view only. Not for Storing, modifying the paper.
+ *
+ * Reason:
+ * Usually <pan> <zoom> => <svg transform="matrix(a,b,c,d,e,f)"></svg>
+ *
+ * But if you need to store the <drag> location, (for storing)
+ * we have to use <circle cx="x" cy="y"></circle> not <circle tranform="matrix(a,b,c,d,e,f)"></circle>
+ *
  *  License
  * =========
  * This code is licensed under the following BSD license:
