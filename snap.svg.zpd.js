@@ -71,6 +71,17 @@
             element.setAttribute("transform", s);
         };
 
+        /**
+         * remove node parent but keep children
+         */
+        var removeNodeKeepChildren = function (node) {
+            if (!node.parentElement) return;
+            while (node.firstChild) {
+                node.parentElement.insertBefore(node.firstChild, node);
+            }
+            node.parentElement.removeChild(node);
+        };
+
         var zpd = function (options, cb) {
 
             var me = this,
@@ -81,7 +92,8 @@
                 svgRoot = null,
                 stateTarget,
                 stateOrigin,
-                stateTf;
+                stateTf,
+                noopF = function () {};
 
             /**
              * add a new <g> element to the paper
@@ -105,7 +117,9 @@
              */
             (function () {
 
+                // check element has zpd() or not
                 if (gelem.hasOwnProperty(me.id)) {
+                    gElem = gelem[me.id];
                     return;
                 }
 
@@ -135,6 +149,8 @@
              * zoom
              * drag
              * zoomScale
+             *
+             * destroy event
              */
             me.pan = true; // 1 or 0: enable or disable panning (default enabled)
             me.zoom = true; // 1 or 0: enable or disable zooming (default enabled)
@@ -147,6 +163,21 @@
                 for (prop in options) {
                     me[prop] = options[prop];
                 }
+            } else if (options === 'destroy') {
+
+                removeNodeKeepChildren(gElem.node);
+                delete gelem[me.id];
+
+                root.onmouseup = noopF;
+                root.onmousedown = noopF;
+                root.onmousemove = noopF;
+
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
+                    root.removeEventListener('mousewheel', handleMouseWheel, false);
+                else
+                    root.removeEventListener('DOMMouseScroll', handleMouseWheel, false);
+
+                return; // exit all
             }
 
             /**

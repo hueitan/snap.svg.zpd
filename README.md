@@ -70,3 +70,10 @@ paper.zoomTo(1.5, 3000, mina.bounce, function (err, paper) {
 });
 ```
     zoom (must > 0), interval (ms optional), mina (optional), callback (optional)
+
+#### paper.zpd('destroy')
+
+```js
+paper.zpd('destroy');
+```
+    Destroy all the zpd elements, events and nodes
