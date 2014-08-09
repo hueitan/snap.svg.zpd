@@ -65,7 +65,7 @@
 
             var me = this,
                 root = me.node, // get paper svg
-                gElem = me.g(), // Snapsvg Element
+                gElem, // Snapsvg Element
                 rootChildNodes = me.node.childNodes, // []
                 state = 'none',
                 svgRoot = null,
@@ -74,6 +74,7 @@
                 stateTf;
 
             /**
+             * add a new <g> element to the paper
              * add paper nodes into <g> element (Snapsvg Element)
              * and give the nodes an unique id like 'snapsvg-zpd-12345'
              * and let this <g> Element to global gelem[this.id]
@@ -93,9 +94,16 @@
              * </svg>
              */
             (function () {
-                var index = 0,
-                    gNode = gElem.node;
 
+                if (gelem.hasOwnProperty(me.id)) {
+                    return;
+                }
+
+                var index = 0,
+                    gNode;
+
+                gElem = me.g();
+                gNode = gElem.node;
                 gNode.id = preUniqueId + me.id;
 
                 gelem[me.id] = gElem;
