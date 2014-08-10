@@ -177,6 +177,9 @@
                 else
                     root.removeEventListener('DOMMouseScroll', handleMouseWheel, false);
 
+                // callback
+                if (cb) cb(null, me);
+                
                 return; // exit all
             }
 
