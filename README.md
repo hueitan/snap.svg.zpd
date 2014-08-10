@@ -62,6 +62,26 @@ paper.zpd(function (err, paper) {
 
 ### More
 
+#### paper.zpd('destroy')
+
+```js
+paper.zpd('destroy');
+```
+    Destroy all the zpd elements, events and nodes
+
+#### paper.zpd('save')
+
+```js
+paper.zpd('save');
+// => return SVGMatrix {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}
+
+paper.zpd('save', function (err, data) {
+    console.log(data);
+    // => return SVGMatrix {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}
+});
+```
+    return current <g> transform attribute (matrix) - only in pan,zoom, not for drag now
+
 #### zoomTo
 
 ```js
@@ -70,10 +90,3 @@ paper.zoomTo(1.5, 3000, mina.bounce, function (err, paper) {
 });
 ```
     zoom (must > 0), interval (ms optional), mina (optional), callback (optional)
-
-#### paper.zpd('destroy')
-
-```js
-paper.zpd('destroy');
-```
-    Destroy all the zpd elements, events and nodes

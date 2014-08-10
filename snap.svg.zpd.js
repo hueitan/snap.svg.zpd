@@ -14,6 +14,12 @@
  * // or callback
  * paper.zpd(function (err, paper) { });
  *
+ * // destroy
+ * paper.zpd('destroy');
+ *
+ * // save
+ * paper.zpd('save');
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -143,27 +149,13 @@
             })();
 
             /**
-             * Configuration of the options and extend by options
-             *
-             * pan
-             * zoom
-             * drag
-             * zoomScale
+             * Useful event for zpd
+             * should return after the event
              *
              * destroy event
+             * save event
              */
-            me.pan = true; // 1 or 0: enable or disable panning (default enabled)
-            me.zoom = true; // 1 or 0: enable or disable zooming (default enabled)
-            me.drag = false; // 1 or 0: enable or disable dragging (default disabled)
-            me.zoomScale = 0.2; // Zoom sensitivity
-
-            if (typeof options === 'function') {
-                cb = options;
-            } else if (typeof options === 'object') {
-                for (prop in options) {
-                    me[prop] = options[prop];
-                }
-            } else if (options === 'destroy') {
+            if (options === 'destroy') {
 
                 removeNodeKeepChildren(gElem.node);
                 delete gelem[me.id];
@@ -179,8 +171,38 @@
 
                 // callback
                 if (cb) cb(null, me);
-                
+
                 return; // exit all
+            } else if (options === 'save') {
+                var g = document.getElementById(preUniqueId + me.id),
+                    returnValue = g.getCTM();
+
+                // callback
+                if (cb) cb(null, returnValue);
+
+                return returnValue;
+            }
+
+            /**
+             * Configuration of the options and extend by options
+             *
+             * pan
+             * zoom
+             * drag
+             * zoomScale
+             *
+             */
+            me.pan = true; // 1 or 0: enable or disable panning (default enabled)
+            me.zoom = true; // 1 or 0: enable or disable zooming (default enabled)
+            me.drag = false; // 1 or 0: enable or disable dragging (default disabled)
+            me.zoomScale = 0.2; // Zoom sensitivity
+
+            if (typeof options === 'function') {
+                cb = options;
+            } else if (typeof options === 'object') {
+                for (prop in options) {
+                    me[prop] = options[prop];
+                }
             }
 
             /**
