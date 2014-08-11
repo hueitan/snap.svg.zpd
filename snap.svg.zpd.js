@@ -23,6 +23,9 @@
  * // load
  * // paper.zpd({ load: SVGMatrix {} });
  *
+ * // origin
+ * paper.zpd('origin');
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -165,6 +168,8 @@
              *
              * destroy event
              * save event
+             * load event (use in options.load)
+             * origin event
              */
             if (options === 'destroy') {
 
@@ -192,6 +197,15 @@
                 if (cb) cb(null, returnValue);
 
                 return returnValue;
+            } else if (options === 'origin') {
+
+                // back to origin location
+                this.zoomTo(1, 1000);
+
+                // callback
+                if (cb) cb(null, me);
+
+                return;
             }
 
             /**
@@ -410,7 +424,7 @@
 
             thisGElem.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
                 if (cb) {
-                    cb(null, thisGElem)
+                    cb(null, thisGElem);
                 }
             });
 

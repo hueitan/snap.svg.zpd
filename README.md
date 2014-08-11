@@ -82,12 +82,19 @@ paper.zpd('save', function (err, data) {
 ```
     return current <g> transform attribute (matrix) - only in pan,zoom, not for drag now
 
-#### paper.zpd({ load: SVGMatrix {}});
+#### paper.zpd({ load: SVGMatrix {}})
 
 ```js
 paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}});
 ```
     set the initial <g> transform matrix
+
+#### paper.zpd('origin')
+
+```js
+paper.zpd('origin');
+```
+    back to the origin location
 
 #### zoomTo
 
