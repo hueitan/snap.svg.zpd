@@ -20,6 +20,9 @@
  * // save
  * paper.zpd('save');
  *
+ * // load
+ * // paper.zpd({ load: SVGMatrix {} });
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -137,7 +140,15 @@
                 gNode.id = preUniqueId + me.id;
 
                 gelem[me.id] = gElem;
-                gelem[me.id].transform('matrix'); // get <g transform="matrix(1,0,0,1,0,0)">
+
+                if (options.load && typeof options.load === 'object') {
+                    var matrix = options.load,
+                        matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+                    gelem[me.id].transform(matrixString); // load <g> transform matrix
+                } else {
+                    gelem[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
+                }
+
 
                 while (rootChildNodes.length - 1 > index) { // length -1 because the <g> element
                     if (!rootChildNodes[index]) {
