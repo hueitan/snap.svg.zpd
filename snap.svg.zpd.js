@@ -26,6 +26,13 @@
  * // origin
  * paper.zpd('origin');
  *
+ * // zoomTo
+ * paper.zoomTo(1);
+ *
+ * // panTo
+ * paper.panTo(0, 0); // original location
+ * paper.panTo('+10', 0); // move right
+ * 
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -92,6 +99,22 @@
                 node.parentElement.insertBefore(node.firstChild, node);
             }
             node.parentElement.removeChild(node);
+        };
+
+        /**
+         * Detect is +1 -1 or 1
+         * increase decrease or just number
+         */
+        var increaseDecreaseOrNumber = function (defaultValue, input) {
+            if (input == undefined) {
+                return parseInt(defaultValue);
+            } else if (input[0] == '+') {
+                return defaultValue + parseInt(input.split('+')[1]);
+            } else if (input[0] == '-') {
+                return defaultValue - parseInt(input.split('-')[1]);
+            } else {
+                return parseInt(input);
+            }
         };
 
         var zpd = function (options, cb) {
@@ -430,11 +453,40 @@
 
         };
 
+        var panTo = function (x, y, interval, ease, cb) {
+
+            var me = this,
+                g = document.getElementById(preUniqueId + me.id),
+                gMatrix = g.getCTM(),
+                matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
+                matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
+                matrixString = "matrix("
+                    + gMatrix.a
+                    + ","
+                    + gMatrix.b
+                    + ","
+                    + gMatrix.c
+                    + ","
+                    + gMatrix.d
+                    + ","
+                    + matrixX
+                    + ","
+                    + matrixY
+                    + ")";
+
+            // gelem[me.id].transform(matrixString); // load <g> transform matrix
+            gelem[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
+                if (cb) {
+                    cb(null, gelem[me.id]);
+                }
+            });
+        };
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
+        Paper.prototype.panTo = panTo;
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
-        // Element.prototype.panTo = panTo; // arg (x, y, ease, interval, cb)
 
         /** rotate => snap.svg.zpdr **/
 

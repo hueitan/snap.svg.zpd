@@ -12,12 +12,28 @@
         .dragText {
             font-size: 100px;
         }
+        .button {
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+            z-index: 100;
+        }
     </style>
 
     <script src="./lib/snap.svg.js"></script>
     <script src="./snap.svg.zpd.js"></script>
 </head>
 <body>
+
+<div class="button">
+    <button id="location">To (0,0) Location</button>
+    <br/>
+    <button id="up">Up</button>
+    <button id="down">Down</button>
+    <br/>
+    <button id="left">Left</button>
+    <button id="right">Right</button>
+</div>
 
 <script>
     var paper = Snap();
@@ -37,6 +53,23 @@
     */
 
     paper.zpd({ drag: true });
+
+    // UI improvement needed
+    document.getElementById('location').onmousedown = function () {
+        paper.panTo(0, 0);
+    };
+    document.getElementById('left').onmousedown = function () {
+        paper.panTo('-10');
+    };
+    document.getElementById('right').onmousedown = function () {
+        paper.panTo('+10');
+    };
+    document.getElementById('up').onmousedown = function () {
+        paper.panTo('+0', '-10');
+    };
+    document.getElementById('down').onmousedown = function () {
+        paper.panTo('+0', '+10');
+    };
 
     // settings
     // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });

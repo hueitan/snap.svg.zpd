@@ -104,3 +104,15 @@ paper.zoomTo(1.5, 3000, mina.bounce, function (err, paper) {
 });
 ```
     zoom (must > 0), interval (ms optional), mina (optional), callback (optional)
+
+#### panTo
+
+```js
+paper.panTo('-1'); // go left -1 x location
+paper.panTo('+0', '-1'); // go up -1 y location
+paper.panTo(100,100); // go to location (x, y) (100, 100)
+paper.panTo(100, 100, 3000, mina.bounce, function (err, paper) {
+    console.log(paper);
+});
+```
+    x, y (can be number or string with + -), interval (ms optional), mina (optional), callback (optional)
