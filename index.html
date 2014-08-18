@@ -33,6 +33,8 @@
     <br/>
     <button id="left">Left</button>
     <button id="right">Right</button>
+    <br/>
+    -- or use arrow key --
 </div>
 
 <script>
@@ -70,7 +72,22 @@
     document.getElementById('down').onmousedown = function () {
         paper.panTo('+0', '+10');
     };
-
+    document.onkeydown = function (e) {
+        switch(e.keyCode) {
+            case 37: // left
+                paper.panTo('-10');
+                break;
+            case 38: // up
+                paper.panTo('+0', '-10');
+                break;
+            case 39: // right
+                paper.panTo('+10');
+                break;
+            case 40: // down
+                paper.panTo('+0', '+10');
+                break;
+        }
+    }
     // settings
     // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
     // paper.zpd(function (err, paper) { console.log(paper); });
