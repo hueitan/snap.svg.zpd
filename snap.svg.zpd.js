@@ -77,18 +77,13 @@
 (function (Snap) {
     Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
 
-        var preUniqueId = 'snapsvgzpd-';
-
-        var gelem = {}; // global get <g> Element
-
         /**
-         * Sets the current transform matrix of an element.
+         * Global variable for snap.svg.zpd plugin
          */
-        var setCTM = function (element, matrix) {
-            var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-
-            element.setAttribute("transform", s);
-        };
+        var snapsvgzpd = {
+            preUniqueId: 'snapsvgzpd-',
+            gelem: {} // global get <g> Element
+        }
 
         /**
          * remove node parent but keep children
@@ -153,8 +148,8 @@
             (function () {
 
                 // check element has zpd() or not
-                if (gelem.hasOwnProperty(me.id)) {
-                    gElem = gelem[me.id];
+                if (snapsvgzpd.gelem.hasOwnProperty(me.id)) {
+                    gElem = snapsvgzpd.gelem[me.id];
                     return;
                 }
 
@@ -163,16 +158,16 @@
 
                 gElem = me.g();
                 gNode = gElem.node;
-                gNode.id = preUniqueId + me.id;
+                gNode.id = snapsvgzpd.preUniqueId + me.id;
 
-                gelem[me.id] = gElem;
+                snapsvgzpd.gelem[me.id] = gElem;
 
                 if (options.load && typeof options.load === 'object') {
                     var matrix = options.load,
                         matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-                    gelem[me.id].transform(matrixString); // load <g> transform matrix
+                    snapsvgzpd.gelem[me.id].transform(matrixString); // load <g> transform matrix
                 } else {
-                    gelem[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
+                    snapsvgzpd.gelem[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
                 }
 
 
@@ -197,7 +192,7 @@
             if (options === 'destroy') {
 
                 removeNodeKeepChildren(gElem.node);
-                delete gelem[me.id];
+                delete snapsvgzpd.gelem[me.id];
 
                 root.onmouseup = noopF;
                 root.onmousedown = noopF;
@@ -213,7 +208,7 @@
 
                 return; // exit all
             } else if (options === 'save') {
-                var g = document.getElementById(preUniqueId + me.id),
+                var g = document.getElementById(snapsvgzpd.preUniqueId + me.id),
                     returnValue = g.getCTM();
 
                 // callback
@@ -291,6 +286,15 @@
             }
 
             /**
+             * Sets the current transform matrix of an element.
+             */
+            var setCTM = function (element, matrix) {
+                var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+
+                element.setAttribute("transform", s);
+            };
+
+            /**
              * Dumps a matrix to a string (useful for debug).
              */
             function dumpMatrix(matrix) {
@@ -330,7 +334,7 @@
 
                 var z = Math.pow(1 + me.zoomScale, delta);
 
-                var g = svgDoc.getElementById(preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
 
                 var p = getEventPoint(evt);
 
@@ -358,7 +362,7 @@
 
                 var svgDoc = evt.target.ownerDocument;
 
-                var g = svgDoc.getElementById(preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
 
                 if (state == 'pan' && me.pan) {
                     // Pan mode
@@ -386,7 +390,7 @@
 
                 var svgDoc = evt.target.ownerDocument;
 
-                var g = svgDoc.getElementById(preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
 
                 if (
                     evt.target.tagName == "svg"
@@ -439,7 +443,7 @@
             }
 
             var me = this,
-                thisGElem = gelem[me.id];
+                thisGElem = snapsvgzpd.gelem[me.id];
 
             if (typeof interval !== 'number') {
                 interval = 3000;
@@ -456,7 +460,7 @@
         var panTo = function (x, y, interval, ease, cb) {
 
             var me = this,
-                g = document.getElementById(preUniqueId + me.id),
+                g = document.getElementById(snapsvgzpd.preUniqueId + me.id),
                 gMatrix = g.getCTM(),
                 matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
                 matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
@@ -475,9 +479,9 @@
                     + ")";
 
             // gelem[me.id].transform(matrixString); // load <g> transform matrix
-            gelem[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
+            snapsvgzpd.gelem[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
                 if (cb) {
-                    cb(null, gelem[me.id]);
+                    cb(null, snapsvgzpd.gelem[me.id]);
                 }
             });
         };
