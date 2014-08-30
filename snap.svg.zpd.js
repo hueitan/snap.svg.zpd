@@ -82,7 +82,8 @@
          */
         var snapsvgzpd = {
             preUniqueId: 'snapsvgzpd-',
-            gelem: {} // global get <g> Element
+            gelem: {}, // global get <g> Element
+            isDestroy: false // if snapsvgzpd is destroy
         }
 
         /**
@@ -191,6 +192,7 @@
              */
             if (options === 'destroy') {
 
+                snapsvgzpd.isDestroy = true;
                 removeNodeKeepChildren(gElem.node);
                 delete snapsvgzpd.gelem[me.id];
 
@@ -198,10 +200,12 @@
                 root.onmousedown = noopF;
                 root.onmousemove = noopF;
 
+                /* Don't use this because removeEventListener doesn't work anymore
                 if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
                     root.removeEventListener('mousewheel', handleMouseWheel, false);
                 else
                     root.removeEventListener('DOMMouseScroll', handleMouseWheel, false);
+                */
 
                 // callback
                 if (cb) cb(null, me);
@@ -234,11 +238,13 @@
              * drag
              * zoomScale
              *
+             * isDestory // whether snap.svg.zpd is destroy
              */
             me.pan = true; // 1 or 0: enable or disable panning (default enabled)
             me.zoom = true; // 1 or 0: enable or disable zooming (default enabled)
             me.drag = false; // 1 or 0: enable or disable dragging (default disabled)
             me.zoomScale = 0.2; // Zoom sensitivity
+            snapsvgzpd.isDestroy = false;
 
             if (typeof options === 'function') {
                 cb = options;
@@ -315,7 +321,7 @@
              * Handle mouse wheel event.
              */
             function handleMouseWheel(evt) {
-                if (!me.zoom)
+                if (!me.zoom || snapsvgzpd.isDestroy)
                     return;
 
                 if (evt.preventDefault)
