@@ -35,6 +35,12 @@
             <button id="right">Right</button>
             <br/>
 
+
+            <button id="zoom2x">Zoom To 2x</button>
+            <button id="zoom1x">Zoom To 1x</button>
+            <br/>
+
+
             <button id="destroy">Destroy</button>
             <button id="re-apply">Re-Apply</button>
             <br/>
@@ -83,6 +89,12 @@
             document.getElementById('down').onmousedown = function () {
                 paper.panTo('+0', '+10');
             };
+            document.getElementById('zoom2x').onmousedown = function () {
+                paper.zoomTo(2, 400);
+            }
+            document.getElementById('zoom1x').onmousedown = function () {
+                paper.zoomTo(1, 400);
+            }
             document.onkeydown = function (e) {
                 switch(e.keyCode) {
                     case 37: // left
