@@ -85,7 +85,6 @@
         var snapsvgzpd = {
             preUniqueId: 'snapsvgzpd-',
             gelem: {}, // global get <g> Element
-            isDestroy: false // if snapsvgzpd is destroy
         };
 
         /**
@@ -196,7 +195,6 @@
              */
             if (options === 'destroy') {
 
-                snapsvgzpd.isDestroy = true;
                 removeNodeKeepChildren(gElem.node);
                 delete snapsvgzpd.gelem[me.id];
 
@@ -204,12 +202,12 @@
                 root.onmousedown = noopF;
                 root.onmousemove = noopF;
 
-                /* Don't use this because removeEventListener doesn't work anymore
-                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
                     root.removeEventListener('mousewheel', handleMouseWheel, false);
-                else
+                }
+                else {
                     root.removeEventListener('DOMMouseScroll', handleMouseWheel, false);
-                */
+                }
 
                 // callback
                 if (cb) {
