@@ -83,8 +83,8 @@
          * Global variable for snap.svg.zpd plugin
          */
         var snapsvgzpd = {
-            preUniqueId: 'snapsvgzpd-',
-            gelem: {}, // global get <g> Element
+            prependUniqueId: 'snapsvgzpd-',
+            zpdDataStore: {}, // global get <g> Element
         };
 
         /**
@@ -120,7 +120,7 @@
 
             var me = this,
                 root = me.node, // get paper svg
-                gElem, // Snapsvg Element
+                zpdDataStore, // Snapsvg Element
                 rootChildNodes = me.node.childNodes, // []
                 state = 'none',
                 svgRoot = null,
@@ -133,7 +133,7 @@
              * add a new <g> element to the paper
              * add paper nodes into <g> element (Snapsvg Element)
              * and give the nodes an unique id like 'snapsvg-zpd-12345'
-             * and let this <g> Element to global gelem[this.id]
+             * and let this <g> Element to global zpdDataStore[this.id]
              * and
              * <svg>
              *     <def>something</def>
@@ -152,26 +152,26 @@
             (function () {
 
                 // check element has zpd() or not
-                if (snapsvgzpd.gelem.hasOwnProperty(me.id)) {
-                    gElem = snapsvgzpd.gelem[me.id];
+                if (snapsvgzpd.zpdDataStore.hasOwnProperty(me.id)) {
+                    zpdDataStore = snapsvgzpd.zpdDataStore[me.id];
                     return;
                 }
 
                 var index = 0,
                     gNode;
 
-                gElem = me.g();
-                gNode = gElem.node;
-                gNode.id = snapsvgzpd.preUniqueId + me.id;
+                zpdDataStore = me.g();
+                gNode = zpdDataStore.node;
+                gNode.id = snapsvgzpd.prependUniqueId + me.id;
 
-                snapsvgzpd.gelem[me.id] = gElem;
+                snapsvgzpd.zpdDataStore[me.id] = zpdDataStore;
 
                 if (options.load && typeof options.load === 'object') {
                     var matrix = options.load,
                         matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-                    snapsvgzpd.gelem[me.id].transform(matrixString); // load <g> transform matrix
+                    snapsvgzpd.zpdDataStore[me.id].transform(matrixString); // load <g> transform matrix
                 } else {
-                    snapsvgzpd.gelem[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
+                    snapsvgzpd.zpdDataStore[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
                 }
 
 
@@ -195,8 +195,8 @@
              */
             if (options === 'destroy') {
 
-                removeNodeKeepChildren(gElem.node);
-                delete snapsvgzpd.gelem[me.id];
+                removeNodeKeepChildren(zpdDataStore.node);
+                delete snapsvgzpd.zpdDataStore[me.id];
 
                 root.onmouseup = noopF;
                 root.onmousedown = noopF;
@@ -217,11 +217,14 @@
                 return; // exit all
 
             } else if (options === 'save') {
-                var g = document.getElementById(snapsvgzpd.preUniqueId + me.id),
+
+                var g = document.getElementById(snapsvgzpd.prependUniqueId + me.id),
                     returnValue = g.getCTM();
 
                 // callback
-                if (cb) cb(null, returnValue);
+                if (cb) {
+                    cb(null, returnValue);
+                }
 
                 return returnValue;
 
@@ -234,9 +237,6 @@
                 if (cb) {
                     cb(null, me);
                 }
-
-                return;
-            }
 
             /**
              * Configuration of the options and extend by options
@@ -363,7 +363,7 @@
 
                 var z = Math.pow(1 + me.zoomScale, delta);
 
-                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
 
                 var p = getEventPoint(evt);
 
@@ -395,7 +395,7 @@
 
                 var svgDoc = evt.target.ownerDocument;
 
-                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
 
                 if (state == 'pan' && me.pan) {
                     // Pan mode
@@ -427,7 +427,7 @@
 
                 var svgDoc = evt.target.ownerDocument;
 
-                var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
+                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
 
                 if (
                     evt.target.tagName == "svg" || !me.drag    // Pan anyway when drag is disabled and the user clicked on an element
@@ -480,16 +480,16 @@
                 return;
             }
 
-            var me = this,
-                thisGElem = snapsvgzpd.gelem[me.id];
+            var me = this;
+            var thiszpdDataStore = snapsvgzpd.zpdDataStore[me.id];
 
             if (typeof interval !== 'number') {
                 interval = 3000;
             }
 
-            thisGElem.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
+            thiszpdDataStore.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
                 if (cb) {
-                    cb(null, thisGElem);
+                    cb(null, thiszpdDataStore);
                 }
             });
 
@@ -498,16 +498,16 @@
         var panTo = function (x, y, interval, ease, cb) {
 
             var me = this,
-                g = document.getElementById(snapsvgzpd.preUniqueId + me.id),
+                g = document.getElementById(snapsvgzpd.prependUniqueId + me.id),
                 gMatrix = g.getCTM(),
                 matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
                 matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
                 matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
 
-            // gelem[me.id].transform(matrixString); // load <g> transform matrix
-            snapsvgzpd.gelem[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
+            // zpdDataStore[me.id].transform(matrixString); // load <g> transform matrix
+            snapsvgzpd.zpdDataStore[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
                 if (cb) {
-                    cb(null, snapsvgzpd.gelem[me.id]);
+                    cb(null, snapsvgzpd.zpdDataStore[me.id]);
                 }
             });
         };
