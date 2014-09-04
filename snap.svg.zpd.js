@@ -476,19 +476,28 @@
 
         var panTo = function (x, y, interval, ease, cb) {
 
-            var me = this,
-                g = document.getElementById(snapsvgzpd.prependUniqueId + me.id),
-                gMatrix = g.getCTM(),
-                matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
-                matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
-                matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
+            // get a reference to the current element
+            var self = this;
 
-            // dataStore[me.id].transform(matrixString); // load <g> transform matrix
-            snapsvgzpd.dataStore[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
-                if (cb) {
-                    cb(null, snapsvgzpd.dataStore[me.id]);
-                }
-            });
+            // check if we have this element in our zpd data storage
+            if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
+
+                var zpdElement = snapsvgzpd.dataStore[self.id];
+
+                var gMatrix = zpdElement.node.getCTM(),
+                    matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
+                    matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
+                    matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
+
+                // dataStore[me.id].transform(matrixString); // load <g> transform matrix
+                zpdElement.animate({ transform: matrixString }, interval || 10, ease || null, function () {
+                    if (cb) {
+                        cb(null, zpdElement);
+                    }
+                });
+
+            }
+
         };
 
         Paper.prototype.zpd = zpd;
