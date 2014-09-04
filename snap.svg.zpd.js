@@ -503,12 +503,15 @@
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
+
+
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
 
         /** rotate => snap.svg.zpdr **/
 
         /** UI for zpdr **/
+
     });
 
 })(Snap);
