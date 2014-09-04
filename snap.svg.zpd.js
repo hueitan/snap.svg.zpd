@@ -472,26 +472,32 @@
             setupHandlers();
         };
 
-
-        var zoomTo = function (zoom, interval, ease, cb) {
+        var zoomTo = function (zoom, interval, ease, callbackFunction) {
 
             if (zoom < 0 || typeof zoom !== 'number') {
-                console.error('zoomTo(arg) should be a number and greater than 0')
+                console.error('zoomTo(arg) should be a number and greater than 0');
                 return;
             }
-
-            var me = this;
-            var thiszpdDataStore = snapsvgzpd.zpdDataStore[me.id];
 
             if (typeof interval !== 'number') {
                 interval = 3000;
             }
 
-            thiszpdDataStore.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
-                if (cb) {
-                    cb(null, thiszpdDataStore);
-                }
-            });
+            var self = this;
+
+            // check if we have this element in our zpd data storage
+            if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
+
+                // get a reference to the element
+                var zpdElement = snapsvgzpd.dataStore[self.id];
+
+                // animate our element and call the callback afterwards
+                zpdElement.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
+                    if (callbackFunction) {
+                        callbackFunction(null, zpdElement);
+                    }
+                });
+            }
 
         };
 
