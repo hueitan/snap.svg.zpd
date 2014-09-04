@@ -116,18 +116,6 @@
             }
         };
 
-        var zpd = function (options, cb) {
-
-            var me = this,
-                root = me.node, // get paper svg
-                dataStore, // Snapsvg Element
-                rootChildNodes = me.node.childNodes, // []
-                state = 'none',
-                svgRoot = null,
-                stateTarget,
-                stateOrigin,
-                stateTf,
-                noopF = function () {};
         /**
          * Sets the current transform matrix of an element.
          */
@@ -136,27 +124,6 @@
             element.setAttribute("transform", s);
         };
 
-            /**
-             * add a new <g> element to the paper
-             * add paper nodes into <g> element (Snapsvg Element)
-             * and give the nodes an unique id like 'snapsvg-zpd-12345'
-             * and let this <g> Element to global dataStore[this.id]
-             * and
-             * <svg>
-             *     <def>something</def>
-             *     <circle cx="10" cy="10" r="100"></circle>
-             * </svg>
-             *
-             * transform to =>
-             *
-             * <svg>
-             *     <g>
-             *         <def>something</def>
-             *         <circle cx="10" cy="10" r="100"></circle>
-             *     </g>
-             * </svg>
-             */
-            (function () {
         /**
          * Dumps a matrix to a string (useful for debug).
          */
@@ -165,11 +132,6 @@
             return s;
         };
 
-                // check element has zpd() or not
-                if (snapsvgzpd.dataStore.hasOwnProperty(me.id)) {
-                    dataStore = snapsvgzpd.dataStore[me.id];
-                    return;
-                }
         /**
          * Sets attributes of an element.
          */
@@ -179,32 +141,119 @@
             }
         };
 
-                var index = 0,
-                    gNode;
+        /**
+         * add a new <g> element to the paper
+         * add paper nodes into <g> element (Snapsvg Element)
+         * and give the nodes an unique id like 'snapsvg-zpd-12345'
+         * and let this <g> Element to global snapsvgzpd.dataStore['snapsvg-zpd-12345']
+         * and
+         * <svg>
+         *     <def>something</def>
+         *     <circle cx="10" cy="10" r="100"></circle>
+         * </svg>
+         *
+         * transform to =>
+         *
+         * <svg>
+         *     <g id="snapsvg-zpd-12345">
+         *         <def>something</def>
+         *         <circle cx="10" cy="10" r="100"></circle>
+         *     </g>
+         * </svg>
+         */
+        var _initAndGetZpdElement = function initAndGetZpdElement (svgElement, loadMatrix) {
 
-                dataStore = me.g();
-                gNode = dataStore.node;
-                gNode.id = snapsvgzpd.prependUniqueId + me.id;
+            // check if element was already initialized
+            if (snapsvgzpd.dataStore.hasOwnProperty(svgElement.id)) {
+                // return existing element
+                return snapsvgzpd.dataStore[svgElement.id];
+            }
+            else {
 
-                snapsvgzpd.dataStore[me.id] = dataStore;
+                // get all child nodes in our svg element
+                var rootChildNodes = svgElement.node.childNodes;
 
-                if (options.load && typeof options.load === 'object') {
-                    var matrix = options.load,
-                        matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-                    snapsvgzpd.dataStore[me.id].transform(matrixString); // load <g> transform matrix
+                // create a new graphics element in our svg element
+                var gElement = svgElement.g();
+                var gNode = gElement.node;
+
+                // add our unique id
+                gNode.id = snapsvgzpd.prependUniqueId + svgElement.id;
+
+                // check if a matrix has been supplied to initialize the drawing
+                if (loadMatrix && typeof loadMatrix === 'object') {
+
+                    // create a matrix string from our supplied matrix
+                    var matrixString = "matrix(" + loadMatrix.a + "," + loadMatrix.b + "," + loadMatrix.c + "," + loadMatrix.d + "," + loadMatrix.e + "," + loadMatrix.f + ")";
+
+                    // load <g> transform matrix
+                    gElement.transform(matrixString);
+
+
                 } else {
-                    snapsvgzpd.dataStore[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
+                    // initial set <g transform="matrix(1,0,0,1,0,0)">
+                    gElement.transform('matrix');
                 }
 
+                // initialize our index counter for child nodes
+                var index = 0;
 
-                while (rootChildNodes.length - 1 > index) { // length -1 because the <g> element
-                    if (!rootChildNodes[index]) {
-                        index++;
-                        continue;
-                    }
+                // get the length ouf our rootChildNodes (to avoid recalculation in loop)
+                var rootChildNodesLength = rootChildNodes.length;
+
+                // append the nodes to our newly created g-element
+                for (index; index < rootChildNodesLength; index++) {
                     gNode.appendChild(rootChildNodes[index]);
                 }
-            })();
+
+                // store a reference in our "global" data store
+                snapsvgzpd.dataStore[svgElement.id] = gElement;
+
+                // return our element
+                return gElement;
+
+            }
+
+        };
+
+        /* our global zpd function */
+        var zpd = function (options, callbackFunc) {
+
+            // get a reference to the current element
+            var self = this;
+
+            // define some data to be used in the function internally
+            var zpdData = {
+                root: self.node,        // get paper svg
+                dataStore: null,        // Snapsvg Element
+                rootChildNodes: self.node.childNodes,     // []
+                state: 'none',
+                svgRoot: null,
+                stateTarget: null,
+                stateOrigin: null,
+                stateTf: null,
+                noopF: function () {}
+            };
+
+            // define some custom options
+            var zpdOptions = {
+                pan: true,          // enable or disable panning (default enabled)
+                zoom: true,         // enable or disable zooming (default enabled)
+                drag: false,        // enable or disable dragging (default disabled)
+                zoomScale: 0.2      // defien zoom sensitivity
+            };
+
+            // it is also possible to only specify a callback function without any options
+            if (typeof options === 'function') {
+                callbackFunc = options;
+
+            } else if (typeof options === 'object') {
+                for (var prop in options) {
+                    zpdOptions = options[prop];
+                }
+            }
+
+            var zpdElement = _initAndGetZpdElement(self);
 
             /**
              * Useful event for zpd
@@ -260,31 +309,10 @@
                     cb(null, me);
                 }
 
-            /**
-             * Configuration of the options and extend by options
-             *
-             * pan
-             * zoom
-             * drag
-             * zoomScale
-             *
-             * isDestory // whether snap.svg.zpd is destroy
-             */
-            me.pan = true; // 1 or 0: enable or disable panning (default enabled)
-            me.zoom = true; // 1 or 0: enable or disable zooming (default enabled)
-            me.drag = false; // 1 or 0: enable or disable dragging (default disabled)
-            me.zoomScale = 0.2; // Zoom sensitivity
-            snapsvgzpd.isDestroy = false;
-
-            if (typeof options === 'function') {
-                cb = options;
-            } else if (typeof options === 'object') {
-
-                for (var prop in options) {
-                    me[prop] = options[prop];
-                }
-
+                return;
             }
+
+
 
             /**
              * Register handlers
