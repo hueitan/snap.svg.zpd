@@ -90,7 +90,7 @@
         /**
          * remove node parent but keep children
          */
-        var removeNodeKeepChildren = function (node) {
+        var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
             if (!node.parentElement) {
                 return;
             }
@@ -104,7 +104,7 @@
          * Detect is +1 -1 or 1
          * increase decrease or just number
          */
-        var increaseDecreaseOrNumber = function (defaultValue, input) {
+        var _increaseDecreaseOrNumber = function increaseDecreaseOrNumber(defaultValue, input) {
             if (input === undefined) {
                 return parseInt(defaultValue);
             } else if (input[0] == '+') {
@@ -128,6 +128,13 @@
                 stateOrigin,
                 stateTf,
                 noopF = function () {};
+        /**
+         * Sets the current transform matrix of an element.
+         */
+        var _setCTM = function setCTM(element, matrix) {
+            var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+            element.setAttribute("transform", s);
+        };
 
             /**
              * add a new <g> element to the paper
@@ -150,12 +157,27 @@
              * </svg>
              */
             (function () {
+        /**
+         * Dumps a matrix to a string (useful for debug).
+         */
+        var _dumpMatrix = function dumpMatrix(matrix) {
+            var s = "[ " + matrix.a + ", " + matrix.c + ", " + matrix.e + "\n  " + matrix.b + ", " + matrix.d + ", " + matrix.f + "\n  0, 0, 1 ]";
+            return s;
+        };
 
                 // check element has zpd() or not
                 if (snapsvgzpd.dataStore.hasOwnProperty(me.id)) {
                     dataStore = snapsvgzpd.dataStore[me.id];
                     return;
                 }
+        /**
+         * Sets attributes of an element.
+         */
+        var _setAttributes = function setAttributes(element, attributes) {
+            for (var i in attributes) {
+                element.setAttributeNS(null, i, attributes[i]);
+            }
+        };
 
                 var index = 0,
                     gNode;
@@ -195,7 +217,7 @@
              */
             if (options === 'destroy') {
 
-                removeNodeKeepChildren(dataStore.node);
+                _removeNodeKeepChildren(dataStore.node);
                 delete snapsvgzpd.dataStore[me.id];
 
                 root.onmouseup = noopF;
