@@ -1,3 +1,5 @@
+/* globals Snap, document, navigator */
+
 /**
  *  snapsvg-zpd.js: A zoom/pan/drag plugin for Snap.svg
  * ==================================================
@@ -32,7 +34,7 @@
  * // panTo
  * paper.panTo(0, 0); // original location
  * paper.panTo('+10', 0); // move right
- * 
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -84,13 +86,15 @@
             preUniqueId: 'snapsvgzpd-',
             gelem: {}, // global get <g> Element
             isDestroy: false // if snapsvgzpd is destroy
-        }
+        };
 
         /**
          * remove node parent but keep children
          */
         var removeNodeKeepChildren = function (node) {
-            if (!node.parentElement) return;
+            if (!node.parentElement) {
+                return;
+            }
             while (node.firstChild) {
                 node.parentElement.insertBefore(node.firstChild, node);
             }
@@ -102,7 +106,7 @@
          * increase decrease or just number
          */
         var increaseDecreaseOrNumber = function (defaultValue, input) {
-            if (input == undefined) {
+            if (input === undefined) {
                 return parseInt(defaultValue);
             } else if (input[0] == '+') {
                 return defaultValue + parseInt(input.split('+')[1]);
@@ -208,9 +212,12 @@
                 */
 
                 // callback
-                if (cb) cb(null, me);
+                if (cb) {
+                    cb(null, me);
+                }
 
                 return; // exit all
+
             } else if (options === 'save') {
                 var g = document.getElementById(snapsvgzpd.preUniqueId + me.id),
                     returnValue = g.getCTM();
@@ -219,13 +226,16 @@
                 if (cb) cb(null, returnValue);
 
                 return returnValue;
+
             } else if (options === 'origin') {
 
                 // back to origin location
                 this.zoomTo(1, 1000);
 
                 // callback
-                if (cb) cb(null, me);
+                if (cb) {
+                    cb(null, me);
+                }
 
                 return;
             }
@@ -249,9 +259,11 @@
             if (typeof options === 'function') {
                 cb = options;
             } else if (typeof options === 'object') {
-                for (prop in options) {
+
+                for (var prop in options) {
                     me[prop] = options[prop];
                 }
+
             }
 
             /**
@@ -262,21 +274,27 @@
 
                 // mobile
                 // (?)
-                
+
                 // desktop
                 if ('onmouseup' in document.documentElement) {
                     root.onmouseup = handleMouseUp;
                     root.onmousedown = handleMouseDown;
                     root.onmousemove = handleMouseMove;
 
-                    if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0)
+                    if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
                         root.addEventListener('mousewheel', handleMouseWheel, false); // Chrome/Safari
-                    else
+                    }
+
+                    else {
                         root.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
+                    }
+
                 }
 
                 // callback
-                if (cb) cb(null, me);
+                if (cb) {
+                    cb(null, me);
+                }
             }
 
             /**
@@ -313,19 +331,24 @@
              * Sets attributes of an element.
              */
             function setAttributes(element, attributes) {
-                for (var i in attributes)
+                for (var i in attributes) {
                     element.setAttributeNS(null, i, attributes[i]);
+                }
+
             }
 
             /**
              * Handle mouse wheel event.
              */
             function handleMouseWheel(evt) {
-                if (!me.zoom || snapsvgzpd.isDestroy)
+                if (!me.zoom || snapsvgzpd.isDestroy) {
                     return;
+                }
 
-                if (evt.preventDefault)
+                if (evt.preventDefault) {
                     evt.preventDefault();
+                }
+
 
                 evt.returnValue = false;
 
@@ -333,10 +356,12 @@
 
                 var delta;
 
-                if (evt.wheelDelta)
+                if (evt.wheelDelta) {
                     delta = evt.wheelDelta / 360; // Chrome/Safari
-                else
+                }
+                else {
                     delta = evt.detail / -9; // Mozilla
+                }
 
                 var z = Math.pow(1 + me.zoomScale, delta);
 
@@ -351,8 +376,10 @@
 
                 setCTM(g, g.getCTM().multiply(k));
 
-                if (typeof(stateTf) == "undefined")
+                if (typeof(stateTf) == "undefined") {
                     stateTf = g.getCTM().inverse();
+                }
+
 
                 stateTf = stateTf.multiply(k.inverse());
             }
@@ -361,8 +388,10 @@
              * Handle mouse move event.
              */
             function handleMouseMove(evt) {
-                if (evt.preventDefault)
+
+                if (evt.preventDefault) {
                     evt.preventDefault();
+                }
 
                 evt.returnValue = false;
 
@@ -375,13 +404,16 @@
                     var p = getEventPoint(evt).matrixTransform(stateTf);
 
                     setCTM(g, stateTf.inverse().translate(p.x - stateOrigin.x, p.y - stateOrigin.y));
+
                 } else if (state == 'drag' && me.drag) {
+
                     // Drag mode
                     var p = getEventPoint(evt).matrixTransform(g.getCTM().inverse());
 
                     setCTM(stateTarget, root.createSVGMatrix().translate(p.x - stateOrigin.x, p.y - stateOrigin.y).multiply(g.getCTM().inverse()).multiply(stateTarget.getCTM()));
 
                     stateOrigin = p;
+
                 }
             }
 
@@ -389,8 +421,9 @@
              * Handle click event.
              */
             function handleMouseDown(evt) {
-                if (evt.preventDefault)
+                if (evt.preventDefault) {
                     evt.preventDefault();
+                }
 
                 evt.returnValue = false;
 
@@ -399,9 +432,8 @@
                 var g = svgDoc.getElementById(snapsvgzpd.preUniqueId + me.id);
 
                 if (
-                    evt.target.tagName == "svg"
-                        || !me.drag // Pan anyway when drag is disabled and the user clicked on an element
-                    ) {
+                    evt.target.tagName == "svg" || !me.drag    // Pan anyway when drag is disabled and the user clicked on an element
+                ) {
                     // Pan mode
                     state = 'pan';
 
@@ -424,8 +456,10 @@
              * Handle mouse button release event.
              */
             function handleMouseUp(evt) {
-                if (evt.preventDefault)
+                if (evt.preventDefault) {
                     evt.preventDefault();
+                }
+
 
                 evt.returnValue = false;
 
@@ -470,19 +504,7 @@
                 gMatrix = g.getCTM(),
                 matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
                 matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
-                matrixString = "matrix("
-                    + gMatrix.a
-                    + ","
-                    + gMatrix.b
-                    + ","
-                    + gMatrix.c
-                    + ","
-                    + gMatrix.d
-                    + ","
-                    + matrixX
-                    + ","
-                    + matrixY
-                    + ")";
+                matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
 
             // gelem[me.id].transform(matrixString); // load <g> transform matrix
             snapsvgzpd.gelem[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
