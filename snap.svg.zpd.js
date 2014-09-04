@@ -84,7 +84,7 @@
          */
         var snapsvgzpd = {
             prependUniqueId: 'snapsvgzpd-',
-            zpdDataStore: {}, // global get <g> Element
+            dataStore: {}, // global get <g> Element
         };
 
         /**
@@ -120,7 +120,7 @@
 
             var me = this,
                 root = me.node, // get paper svg
-                zpdDataStore, // Snapsvg Element
+                dataStore, // Snapsvg Element
                 rootChildNodes = me.node.childNodes, // []
                 state = 'none',
                 svgRoot = null,
@@ -133,7 +133,7 @@
              * add a new <g> element to the paper
              * add paper nodes into <g> element (Snapsvg Element)
              * and give the nodes an unique id like 'snapsvg-zpd-12345'
-             * and let this <g> Element to global zpdDataStore[this.id]
+             * and let this <g> Element to global dataStore[this.id]
              * and
              * <svg>
              *     <def>something</def>
@@ -152,26 +152,26 @@
             (function () {
 
                 // check element has zpd() or not
-                if (snapsvgzpd.zpdDataStore.hasOwnProperty(me.id)) {
-                    zpdDataStore = snapsvgzpd.zpdDataStore[me.id];
+                if (snapsvgzpd.dataStore.hasOwnProperty(me.id)) {
+                    dataStore = snapsvgzpd.dataStore[me.id];
                     return;
                 }
 
                 var index = 0,
                     gNode;
 
-                zpdDataStore = me.g();
-                gNode = zpdDataStore.node;
+                dataStore = me.g();
+                gNode = dataStore.node;
                 gNode.id = snapsvgzpd.prependUniqueId + me.id;
 
-                snapsvgzpd.zpdDataStore[me.id] = zpdDataStore;
+                snapsvgzpd.dataStore[me.id] = dataStore;
 
                 if (options.load && typeof options.load === 'object') {
                     var matrix = options.load,
                         matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-                    snapsvgzpd.zpdDataStore[me.id].transform(matrixString); // load <g> transform matrix
+                    snapsvgzpd.dataStore[me.id].transform(matrixString); // load <g> transform matrix
                 } else {
-                    snapsvgzpd.zpdDataStore[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
+                    snapsvgzpd.dataStore[me.id].transform('matrix'); // initial set <g transform="matrix(1,0,0,1,0,0)">
                 }
 
 
@@ -195,8 +195,8 @@
              */
             if (options === 'destroy') {
 
-                removeNodeKeepChildren(zpdDataStore.node);
-                delete snapsvgzpd.zpdDataStore[me.id];
+                removeNodeKeepChildren(dataStore.node);
+                delete snapsvgzpd.dataStore[me.id];
 
                 root.onmouseup = noopF;
                 root.onmousedown = noopF;
@@ -504,10 +504,10 @@
                 matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
                 matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
 
-            // zpdDataStore[me.id].transform(matrixString); // load <g> transform matrix
-            snapsvgzpd.zpdDataStore[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
+            // dataStore[me.id].transform(matrixString); // load <g> transform matrix
+            snapsvgzpd.dataStore[me.id].animate({ transform: matrixString }, interval || 10, ease || null, function () {
                 if (cb) {
-                    cb(null, snapsvgzpd.zpdDataStore[me.id]);
+                    cb(null, snapsvgzpd.dataStore[me.id]);
                 }
             });
         };
