@@ -216,6 +216,9 @@
 
         };
 
+        var _noopF = function () {};
+
+
         /* our global zpd function */
         var zpd = function (options, callbackFunc) {
 
@@ -232,7 +235,6 @@
                 stateTarget: null,
                 stateOrigin: null,
                 stateTf: null,
-                noopF: function () {}
             };
 
             // define some custom options
