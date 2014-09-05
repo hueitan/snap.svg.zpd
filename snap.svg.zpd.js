@@ -134,7 +134,19 @@
 
 
         /**
+             * Instance an SVGPoint object with given event coordinates.
+             */
+        var _getEventPoint = function getEventPoint(event, svgNode) {
+
+            var p = svgNode.node.createSVGPoint();
+
+            p.x = event.clientX;
+            p.y = event.clientY;
+
+            return p;
+
         };
+
 
         /**
          * add a new <g> element to the paper
