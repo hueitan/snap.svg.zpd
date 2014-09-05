@@ -161,58 +161,58 @@
          *     </g>
          * </svg>
          */
-        var _initAndGetZpdElement = function initAndGetZpdElement (svgElement, loadMatrix) {
+        var _initZpdElement = function initAndGetZpdElement (svgObject, data, options) {
 
-            // check if element was already initialized
-            if (snapsvgzpd.dataStore.hasOwnProperty(svgElement.id)) {
-                // return existing element
-                return snapsvgzpd.dataStore[svgElement.id];
+            // get all child nodes in our svg element
+            var rootChildNodes = svgObject.node.childNodes;
+
+            // create a new graphics element in our svg element
+            var gElement = svgObject.g();
+            var gNode = gElement.node;
+
+            // add our unique id to the element
+            gNode.id = snapsvgzpd.uniqueIdPrefix + svgObject.id;
+
+            // check if a matrix has been supplied to initialize the drawing
+            if (options.load && typeof options.load === 'object') {
+
+                var matrix = options.load;
+
+                // create a matrix string from our supplied matrix
+                var matrixString = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+
+                // load <g> transform matrix
+                gElement.transform(matrixString);
+
+
+            } else {
+                // initial set <g transform="matrix(1,0,0,1,0,0)">
+                gElement.transform('matrix');
             }
-            else {
 
-                // get all child nodes in our svg element
-                var rootChildNodes = svgElement.node.childNodes;
+            // initialize our index counter for child nodes
+            var index = 0;
 
-                // create a new graphics element in our svg element
-                var gElement = svgElement.g();
-                var gNode = gElement.node;
+            // get the number of child nodes in our root node
+            // substract -1 to exclude our <g> element
+            var noOfChildNodes = rootChildNodes.length;
 
-                // add our unique id
-                gNode.id = snapsvgzpd.prependUniqueId + svgElement.id;
-
-                // check if a matrix has been supplied to initialize the drawing
-                if (loadMatrix && typeof loadMatrix === 'object') {
-
-                    // create a matrix string from our supplied matrix
-                    var matrixString = "matrix(" + loadMatrix.a + "," + loadMatrix.b + "," + loadMatrix.c + "," + loadMatrix.d + "," + loadMatrix.e + "," + loadMatrix.f + ")";
-
-                    // load <g> transform matrix
-                    gElement.transform(matrixString);
-
-
-                } else {
-                    // initial set <g transform="matrix(1,0,0,1,0,0)">
-                    gElement.transform('matrix');
-                }
-
-                // initialize our index counter for child nodes
-                var index = 0;
-
-                // get the length ouf our rootChildNodes (to avoid recalculation in loop)
-                var rootChildNodesLength = rootChildNodes.length;
-
-                // append the nodes to our newly created g-element
-                for (index; index < rootChildNodesLength; index++) {
-                    gNode.appendChild(rootChildNodes[index]);
-                }
-
-                // store a reference in our "global" data store
-                snapsvgzpd.dataStore[svgElement.id] = gElement;
-
-                // return our element
-                return gElement;
-
+            // go through all child elements
+            // (except the last one, which is our <g> element)
+            while (index < noOfChildNodes) {
+                gNode.appendChild(rootChildNodes[0]);
+                index += 1;
             }
+
+            // create an element with all required properties
+            var item = {
+                "element": gElement,
+                "data": data,
+                "options": options,
+            };
+
+            // return our element
+            return item;
 
         };
 
