@@ -497,6 +497,9 @@
             setupHandlers();
         };
 
+        /**
+         * zoom element to a certain zoom factor
+         */
         var zoomTo = function (zoom, interval, ease, callbackFunction) {
 
             if (zoom < 0 || typeof zoom !== 'number') {
@@ -526,6 +529,9 @@
 
         };
 
+        /**
+         * move the element to a certain position
+         */
         var panTo = function (x, y, interval, ease, cb) {
 
             // get a reference to the current element
@@ -551,6 +557,7 @@
             }
 
         };
+
 
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
