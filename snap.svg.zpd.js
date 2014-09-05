@@ -132,13 +132,8 @@
             return s;
         };
 
+
         /**
-         * Sets attributes of an element.
-         */
-        var _setAttributes = function setAttributes(element, attributes) {
-            for (var i in attributes) {
-                element.setAttributeNS(null, i, attributes[i]);
-            }
         };
 
         /**
