@@ -229,211 +229,291 @@
                 "options": options,
             };
 
+            // create some mouse event handlers for our item
+            // store them globally for optional removal later on
+            item.handlerFunctions = _getHandlerFunctions(item);
+
             // return our element
             return item;
 
         };
 
 
+        /**
+         * create some handler functions for our mouse actions
+         * we will take advantace of closures to preserve some data
+         */
+        var _getHandlerFunctions = function getHandlerFunctions(zpdElement) {
 
+            var handleMouseUp = function handleMouseUp (event) {
 
-                return returnValue;
-
-            } else if (options === 'origin') {
-
-                // back to origin location
-                this.zoomTo(1, 1000);
-
-                // callback
-                if (cb) {
-                    cb(null, me);
+                if (event.preventDefault) {
+                    event.preventDefault();
                 }
 
-                return;
-            }
+                event.returnValue = false;
 
+                if (zpdElement.data.state == 'pan' || zpdElement.data.state == 'drag') {
 
-
-            /**
-             * Register handlers
-             * desktop and mobile (?)
-             */
-            function setupHandlers() {
-
-                // mobile
-                // (?)
-
-                // desktop
-                if ('onmouseup' in document.documentElement) {
-                    root.onmouseup = handleMouseUp;
-                    root.onmousedown = handleMouseDown;
-                    root.onmousemove = handleMouseMove;
-
-                    if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
-                        root.addEventListener('mousewheel', handleMouseWheel, false); // Chrome/Safari
-                    }
-
-                    else {
-                        root.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
-                    }
+                    // quit pan mode
+                    zpdElement.data.state = '';
 
                 }
 
-                // callback
-                if (cb) {
-                    cb(null, me);
+            };
+
+            var handleMouseDown = function handleMouseDown (event) {
+
+                if (event.preventDefault) {
+                    event.preventDefault();
                 }
-            }
 
-            /**
-             * Instance an SVGPoint object with given event coordinates.
-             */
-            function getEventPoint(evt) {
-                var p = root.createSVGPoint();
+                event.returnValue = false;
 
-                p.x = evt.clientX;
-                p.y = evt.clientY;
+                var g = zpdElement.element.node;
 
-                return p;
-            }
+                if (
+                    event.target.tagName == "svg" || !zpdElement.options.drag // Pan anyway when drag is disabled and the user clicked on an element
+                ) {
+                    // Pan mode
+                    zpdElement.data.state = 'pan';
 
+                    zpdElement.data.stateTf = g.getCTM().inverse();
 
-            /**
-             * Handle mouse wheel event.
-             */
-            function handleMouseWheel(evt) {
-                if (!me.zoom || snapsvgzpd.isDestroy) {
+                    zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+
+                } else {
+
+                    // Drag mode
+                    zpdElement.data.state = 'drag';
+
+                    zpdElement.data.stateTarget = event.target;
+
+                    zpdElement.data.stateTf = g.getCTM().inverse();
+
+                    zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+
+                }
+
+            };
+
+            var handleMouseMove = function handleMouseMove (event) {
+
+                if (event.preventDefault) {
+                    event.preventDefault();
+                }
+
+                event.returnValue = false;
+
+                var g = zpdElement.element.node;
+
+                if (zpdElement.data.state == 'pan' && zpdElement.options.pan) {
+
+                    // Pan mode
+                    var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+
+                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y));
+
+                } else if (zpdElement.data.state == 'drag' && zpdElement.options.drag) {
+
+                    // Drag mode
+                    var dragPoint = _getEventPoint(event, zpdElement.data.svg).matrixTransform(g.getCTM().inverse());
+
+                    _setCTM(zpdElement.data.stateTarget,
+                            zpdElement.data.root.createSVGMatrix()
+                            .translate(dragPoint.x - zpdElement.data.stateOrigin.x, dragPoint.y - zpdElement.data.stateOrigin.y)
+                            .multiply(g.getCTM().inverse())
+                            .multiply(zpdElement.data.stateTarget.getCTM()));
+
+                    zpdElement.data.stateOrigin = dragPoint;
+                }
+            };
+
+            var handleMouseWheel = function handleMouseWheel (event) {
+
+                if (!zpdElement.options.zoom) {
                     return;
                 }
 
-                if (evt.preventDefault) {
-                    evt.preventDefault();
+                if (event.preventDefault) {
+                    event.preventDefault();
                 }
 
+                event.returnValue = false;
 
-                evt.returnValue = false;
+                var delta = 0;
 
-                var svgDoc = evt.target.ownerDocument;
-
-                var delta;
-
-                if (evt.wheelDelta) {
-                    delta = evt.wheelDelta / 360; // Chrome/Safari
+                if (event.wheelDelta) {
+                    delta = event.wheelDelta / 360;  // Chrome/Safari
                 }
                 else {
-                    delta = evt.detail / -9; // Mozilla
+                    delta = event.detail / -9;       // Mozilla
                 }
 
-                var z = Math.pow(1 + me.zoomScale, delta);
+                var z = Math.pow(1 + zpdElement.options.zoomScale, delta);
 
-                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
+                var g = zpdElement.element.node;
 
-                var p = getEventPoint(evt);
+                var p = _getEventPoint(event, zpdElement.data.svg);
 
                 p = p.matrixTransform(g.getCTM().inverse());
 
                 // Compute new scale matrix in current mouse position
-                var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+                var k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 
-                setCTM(g, g.getCTM().multiply(k));
+                _setCTM(g, g.getCTM().multiply(k));
 
                 if (typeof(stateTf) == "undefined") {
-                    stateTf = g.getCTM().inverse();
+                    zpdElement.data.stateTf = g.getCTM().inverse();
                 }
 
+                zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
 
-                stateTf = stateTf.multiply(k.inverse());
-            }
+            };
 
-            /**
-             * Handle mouse move event.
-             */
-            function handleMouseMove(evt) {
+            return {
+                "mouseUp": handleMouseUp,
+                "mouseDown": handleMouseDown,
+                "mouseMove": handleMouseMove,
+                "mouseWheel": handleMouseWheel
+            };
 
-                if (evt.preventDefault) {
-                    evt.preventDefault();
-                }
-
-                evt.returnValue = false;
-
-                var svgDoc = evt.target.ownerDocument;
-
-                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
-
-                if (state == 'pan' && me.pan) {
-                    // Pan mode
-                    var p = getEventPoint(evt).matrixTransform(stateTf);
-
-                    setCTM(g, stateTf.inverse().translate(p.x - stateOrigin.x, p.y - stateOrigin.y));
-
-                } else if (state == 'drag' && me.drag) {
-
-                    // Drag mode
-                    var p = getEventPoint(evt).matrixTransform(g.getCTM().inverse());
-
-                    setCTM(stateTarget, root.createSVGMatrix().translate(p.x - stateOrigin.x, p.y - stateOrigin.y).multiply(g.getCTM().inverse()).multiply(stateTarget.getCTM()));
-
-                    stateOrigin = p;
-
-                }
-            }
-
-            /**
-             * Handle click event.
-             */
-            function handleMouseDown(evt) {
-                if (evt.preventDefault) {
-                    evt.preventDefault();
-                }
-
-                evt.returnValue = false;
-
-                var svgDoc = evt.target.ownerDocument;
-
-                var g = svgDoc.getElementById(snapsvgzpd.prependUniqueId + me.id);
-
-                if (
-                    evt.target.tagName == "svg" || !me.drag    // Pan anyway when drag is disabled and the user clicked on an element
-                ) {
-                    // Pan mode
-                    state = 'pan';
-
-                    stateTf = g.getCTM().inverse();
-
-                    stateOrigin = getEventPoint(evt).matrixTransform(stateTf);
-                } else {
-                    // Drag mode
-                    state = 'drag';
-
-                    stateTarget = evt.target;
-
-                    stateTf = g.getCTM().inverse();
-
-                    stateOrigin = getEventPoint(evt).matrixTransform(stateTf);
-                }
-            }
-
-            /**
-             * Handle mouse button release event.
-             */
-            function handleMouseUp(evt) {
-                if (evt.preventDefault) {
-                    evt.preventDefault();
-                }
-
-
-                evt.returnValue = false;
-
-                var svgDoc = evt.target.ownerDocument;
-
-                if (state == 'pan' || state == 'drag') {
-                    // Quit pan mode
-                    state = '';
-                }
-            }
-
-            setupHandlers();
         };
+
+
+        /**
+             * Register handlers
+             * desktop and mobile (?)
+             */
+        var _setupHandlers = function setupHandlers(svgElement, handlerFunctions) {
+
+            // mobile
+            // (?)
+
+            // desktop
+            if ('onmouseup' in document.documentElement) {
+
+                svgElement.onmouseup = handlerFunctions.mouseUp;
+                svgElement.onmousedown = handlerFunctions.mouseDown;
+                svgElement.onmousemove = handlerFunctions.mouseMove;
+
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+                    svgElement.addEventListener('mousewheel', handlerFunctions.mouseWheel, false); // Chrome/Safari
+                }
+
+                else {
+                    svgElement.addEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false); // Others
+                }
+
+            }
+
+        };
+
+        /**
+         * remove event handlers
+         */
+        var _tearDownHandlers = function tearDownHandlers(svgElement, handlerFunctions) {
+
+            var noopFunc = function () {};
+
+            svgElement.onmouseup = noopFunc;
+            svgElement.onmousedown = noopFunc;
+            svgElement.onmousemove = noopFunc;
+
+            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+                svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
+            }
+            else {
+                svgElement.removeEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false);
+            }
+
+        };
+
+        /* our global zpd function */
+        var zpd = function (options, callbackFunc) {
+
+            // get a reference to the current element
+            var self = this;
+
+            // define some custom options
+            var zpdOptions = {
+                pan: true,          // enable or disable panning (default enabled)
+                zoom: true,         // enable or disable zooming (default enabled)
+                drag: false,        // enable or disable dragging (default disabled)
+                zoomScale: 0.2      // defien zoom sensitivity
+            };
+
+            // it is also possible to only specify a callback function without any options
+            if (typeof options === 'function') {
+                callbackFunc = options;
+
+            }
+            else if (typeof options === 'object') {
+                for (var prop in options) {
+                    zpdOptions[prop] = options[prop];
+                }
+            }
+
+            var zpdElement = null;
+
+            // check if element was already initialized
+            if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
+                // return existing element
+                zpdElement =  snapsvgzpd.dataStore[self.id];
+            }
+            else {
+                // initializel a new element and save it to our global storage
+                zpdElement = _initZpdElement(self, zpdOptions);
+
+                // setup the handlers for our svg-canvas
+                _setupHandlers(self.node, zpdElement.handlerFunctions);
+
+                snapsvgzpd.dataStore[self.id] = zpdElement;
+            }
+
+            switch (options) {
+
+                case'destroy':
+
+                    // remove event handlers
+                    _tearDownHandlers(self.node, zpdElement.handlerFunctions);
+
+                    // remove our custom <g> element
+                    _removeNodeKeepChildren(self.node.firstChild);
+
+                    // remove the object from our internal storage
+                    delete snapsvgzpd.dataStore[self.id];
+
+                    return; // exit all
+
+                case 'save':
+
+                    var g = document.getElementById(snapsvgzpd.preUniqueId + self.id);
+
+                    var returnValue = g.getCTM();
+
+                    // callback
+                    if (callbackFunc) {
+                        callbackFunc(null, returnValue);
+                    }
+
+                    return returnValue;
+
+                case 'origin':
+
+                    // back to origin location
+                    self.zoomTo(1, 1000);
+
+                    // callback
+                    if (callbackFunc) {
+                        callbackFunc(null, returnValue);
+                    }
+
+                    return;
+            }
+        };
+
+
 
         /**
          * zoom element to a certain zoom factor
@@ -466,6 +546,7 @@
             }
 
         };
+
 
         /**
          * move the element to a certain position
