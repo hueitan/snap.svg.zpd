@@ -83,8 +83,8 @@
          * Global variable for snap.svg.zpd plugin
          */
         var snapsvgzpd = {
-            prependUniqueId: 'snapsvg-zpd-',
-            dataStore: {}, // global get <g> Element
+            uniqueIdPrefix: 'snapsvg-zpd-',     // prefix for the unique ids created for zpd
+            dataStore: {}                       // "global" storage for all our zpd elements
         };
 
         /**
