@@ -543,8 +543,8 @@
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
 
                 var gMatrix = zpdElement.node.getCTM(),
-                    matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
-                    matrixY = increaseDecreaseOrNumber(gMatrix.f, y),
+                    matrixX = _increaseDecreaseOrNumber(gMatrix.e, x),
+                    matrixY = _increaseDecreaseOrNumber(gMatrix.f, y),
                     matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + matrixX + "," + matrixY + ")";
 
                 // dataStore[me.id].transform(matrixString); // load <g> transform matrix
