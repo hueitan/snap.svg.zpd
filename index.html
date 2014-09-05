@@ -1,107 +1,139 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>A zoom/pan/drag plugin for Snap.svg</title>
-    <style>
-        html, body { margin:0; padding:0; overflow:hidden }
-        svg { position:fixed; top:0; left:0; height:100%; width:100% }
-        .dragText {
-            font-size: 100px;
-        }
-        .button {
-            position: fixed;
-            right: 50px;
-            bottom: 50px;
-            z-index: 100;
-        }
-    </style>
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>A zoom/pan/drag plugin for Snap.svg</title>
+        <style>
+            html, body { margin:0; padding:0; overflow:hidden }
+            svg { position:fixed; top:0; left:0; height:100%; width:100% }
+            .dragText {
+                font-size: 100px;
+            }
+            .button {
+                position: fixed;
+                right: 50px;
+                bottom: 50px;
+                z-index: 100;
+            }
+        </style>
 
-    <script src="./lib/snap.svg.js"></script>
-    <script src="./snap.svg.zpd.js"></script>
-</head>
-<body>
+        <script src="./lib/snap.svg.js"></script>
+        <script src="./snap.svg.zpd.js"></script>
+    </head>
+    <body>
 
-<div class="button">
-    <button id="location">To (0,0) Location</button>
-    <br/>
-    <button id="up">Up</button>
-    <button id="down">Down</button>
-    <br/>
-    <button id="left">Left</button>
-    <button id="right">Right</button>
-    <br/>
-    -- or use arrow key --
-</div>
+        <div class="button">
+            <button id="location">To (0,0) Location</button>
+            <br/>
+            <button id="up">Up</button>
+            <button id="down">Down</button>
+            <br/>
+            <button id="left">Left</button>
+            <button id="right">Right</button>
+            <br/>
 
-<script>
-    var paper = Snap();
 
-    var image1 = paper.image('./lib/image1.png',820,270);
-    var image2 = paper.image('./lib/image2.png',100,220, 500,205);
-    var image3 = paper.image('./lib/image3.png',500,100, 400,332.5);
-    var text = paper.text(50, 100, 'drag me').addClass('dragText');
+            <button id="zoom2x">Zoom To 2x</button>
+            <button id="zoom1x">Zoom To 1x</button>
+            <br/>
 
-    /*
-    Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
-        var s = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        s.appendChild(data.node);
-        paper.append(s);
-        paper.zpd();
-    });
-    */
 
-    paper.zpd({ drag: true });
+            <button id="destroy">Destroy</button>
+            <button id="reapply">Re-Apply</button>
+            <br/>
+            -- or use arrow key --
+        </div>
 
-    // UI improvement needed
-    document.getElementById('location').onmousedown = function () {
-        paper.panTo(0, 0);
-    };
-    document.getElementById('left').onmousedown = function () {
-        paper.panTo('-10');
-    };
-    document.getElementById('right').onmousedown = function () {
-        paper.panTo('+10');
-    };
-    document.getElementById('up').onmousedown = function () {
-        paper.panTo('+0', '-10');
-    };
-    document.getElementById('down').onmousedown = function () {
-        paper.panTo('+0', '+10');
-    };
-    document.onkeydown = function (e) {
-        switch(e.keyCode) {
-            case 37: // left
+        <script>
+
+            var paper = Snap();
+
+            var image1 = paper.image('./lib/image1.png',820,270);
+            var image2 = paper.image('./lib/image2.png',100,220, 500,205);
+            var image3 = paper.image('./lib/image3.png',500,100, 400,332.5);
+            var text = paper.text(50, 100, 'drag me').addClass('dragText');
+
+            /*
+                Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
+                    var s = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    s.appendChild(data.node);
+                    paper.append(s);
+                    paper.zpd();
+                });
+            */
+
+            var applyZpd = function() {
+                paper.zpd({ drag: true });
+            };
+
+            // run initializer
+            applyZpd();
+
+
+            // UI improvement needed
+            document.getElementById('location').onmousedown = function () {
+                paper.panTo(0, 0);
+            };
+            document.getElementById('left').onmousedown = function () {
                 paper.panTo('-10');
-                break;
-            case 38: // up
-                paper.panTo('+0', '-10');
-                break;
-            case 39: // right
+            };
+            document.getElementById('right').onmousedown = function () {
                 paper.panTo('+10');
-                break;
-            case 40: // down
+            };
+            document.getElementById('up').onmousedown = function () {
+                paper.panTo('+0', '-10');
+            };
+            document.getElementById('down').onmousedown = function () {
                 paper.panTo('+0', '+10');
-                break;
-        }
-    }
-    // settings
-    // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
-    // paper.zpd(function (err, paper) { console.log(paper); });
-    // paper.zpd({ zoom: false }, function (err, paper) { console.log(paper); });
+            };
+            document.getElementById('zoom2x').onmousedown = function () {
+                paper.zoomTo(2, 400);
+            }
+            document.getElementById('zoom1x').onmousedown = function () {
+                paper.zoomTo(1, 400);
+            }
+            document.onkeydown = function (e) {
+                switch(e.keyCode) {
+                    case 37: // left
+                        paper.panTo('-10');
+                        break;
+                    case 38: // up
+                        paper.panTo('+0', '-10');
+                        break;
+                    case 39: // right
+                        paper.panTo('+10');
+                        break;
+                    case 40: // down
+                        paper.panTo('+0', '+10');
+                        break;
+                }
+            }
 
-    // zoomTo
-    // paper.zoomTo(1.5, 1000, mina.bounce, function (err, paper) { console.log(paper); });
+            document.getElementById('destroy').onmousedown = function () {
+                paper.zpd('destroy');
+            }
 
-    // destroy
-    // paper.zpd('destroy');
+            document.getElementById('reapply').onmousedown = function () {
+               applyZpd();
+            }
 
-    // load
-    // paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}});
-</script>
-</body>
+            // settings
+            // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
+            // paper.zpd(function (err, paper) { console.log(paper); });
+            // paper.zpd({ zoom: false }, function (err, paper) { console.log(paper); });
+
+            // zoomTo
+            // paper.zoomTo(1.5, 1000, mina.bounce, function (err, paper) { console.log(paper); });
+
+            // destroy
+            // paper.zpd('destroy');
+
+            // load
+            // paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}});
+        </script>
+    </body>
 
 </html>
