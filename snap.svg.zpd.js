@@ -517,7 +517,7 @@
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
 
                 // get a reference to the element
-                var zpdElement = snapsvgzpd.dataStore[self.id];
+                var zpdElement = snapsvgzpd.dataStore[self.id].element;
 
                 // animate our element and call the callback afterwards
                 zpdElement.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
@@ -540,7 +540,7 @@
             // check if we have this element in our zpd data storage
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
 
-                var zpdElement = snapsvgzpd.dataStore[self.id];
+                var zpdElement = snapsvgzpd.dataStore[self.id].element;
 
                 var gMatrix = zpdElement.node.getCTM(),
                     matrixX = increaseDecreaseOrNumber(gMatrix.e, x),
