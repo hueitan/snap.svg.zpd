@@ -168,7 +168,7 @@
          *     </g>
          * </svg>
          */
-        var _initZpdElement = function initAndGetZpdElement (svgObject, data, options) {
+        var _initZpdElement = function initAndGetZpdElement (svgObject, options) {
 
             // get all child nodes in our svg element
             var rootChildNodes = svgObject.node.childNodes;
@@ -210,6 +210,17 @@
                 gNode.appendChild(rootChildNodes[0]);
                 index += 1;
             }
+
+            // define some data to be used in the function internally
+            var data = {
+                svg: svgObject,
+                root: svgObject.node,        // get paper svg
+                state: 'none',
+                stateTarget: null,
+                stateOrigin: null,
+                stateTf: null,
+            };
+
 
             // create an element with all required properties
             var item = {
