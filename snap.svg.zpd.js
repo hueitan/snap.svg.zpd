@@ -195,7 +195,7 @@
 
             // get the number of child nodes in our root node
             // substract -1 to exclude our <g> element
-            var noOfChildNodes = rootChildNodes.length;
+            var noOfChildNodes = rootChildNodes.length - 1;
 
             // go through all child elements
             // (except the last one, which is our <g> element)
