@@ -393,9 +393,9 @@
             // desktop
             if ('onmouseup' in document.documentElement) {
 
-                svgElement.onmouseup = handlerFunctions.mouseUp;
-                svgElement.onmousedown = handlerFunctions.mouseDown;
-                svgElement.onmousemove = handlerFunctions.mouseMove;
+                svgElement.addEventListener('mouseup', handlerFunctions.mouseUp, false);
+                svgElement.addEventListener('mousedown', handlerFunctions.mouseDown, false);
+                svgElement.addEventListener('mousemove', handlerFunctions.mouseMove, false);
 
                 if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
                     svgElement.addEventListener('mousewheel', handlerFunctions.mouseWheel, false); // Chrome/Safari
@@ -414,11 +414,9 @@
          */
         var _tearDownHandlers = function tearDownHandlers(svgElement, handlerFunctions) {
 
-            var noopFunc = function () {};
-
-            svgElement.onmouseup = noopFunc;
-            svgElement.onmousedown = noopFunc;
-            svgElement.onmousemove = noopFunc;
+            svgElement.removeEventListener('mouseup', handlerFunctions.mouseUp, false);
+            svgElement.removeEventListener('mousedown', handlerFunctions.mouseDown, false);
+            svgElement.removeEventListener('mousemove', handlerFunctions.mouseMove, false);
 
             if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
                 svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
