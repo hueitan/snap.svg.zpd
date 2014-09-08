@@ -393,6 +393,7 @@
             // desktop
             if ('onmouseup' in document.documentElement) {
 
+                // IE < 9 would need to use the event onmouseup, but they do not support svg anyway..
                 svgElement.addEventListener('mouseup', handlerFunctions.mouseUp, false);
                 svgElement.addEventListener('mousedown', handlerFunctions.mouseDown, false);
                 svgElement.addEventListener('mousemove', handlerFunctions.mouseMove, false);
