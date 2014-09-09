@@ -441,27 +441,38 @@
                 drag: false,        // enable or disable dragging (default disabled)
                 zoomScale: 0.2      // defien zoom sensitivity
             };
+            
+            var zpdElement = null;
 
             // it is also possible to only specify a callback function without any options
             if (typeof options === 'function') {
                 callbackFunc = options;
-
             }
-            else if (typeof options === 'object') {
-                for (var prop in options) {
-                    zpdOptions[prop] = options[prop];
-                }
-            }
-
-            var zpdElement = null;
 
             // check if element was already initialized
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
+                
                 // return existing element
                 zpdElement =  snapsvgzpd.dataStore[self.id];
+                
+                // adapt the stored options, with the options passed in
+                if (typeof options === 'object') {
+                    for (var prop in options) {
+                        zpdElement.options[prop] = options[prop];
+                    }
+                }
+                
             }
             else {
-                // initializel a new element and save it to our global storage
+                
+                // adapt the default options
+                if (typeof options === 'object') {
+                    for (var prop in options) {
+                        zpdOptions[prop] = options[prop];
+                    }
+                }
+   
+                // initialize a new element and save it to our global storage
                 zpdElement = _initZpdElement(self, zpdOptions);
 
                 // setup the handlers for our svg-canvas
