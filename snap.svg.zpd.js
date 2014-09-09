@@ -132,10 +132,9 @@
             return s;
         };
 
-
         /**
-             * Instance an SVGPoint object with given event coordinates.
-             */
+         * Instance an SVGPoint object with given event coordinates.
+         */
         var _getEventPoint = function getEventPoint(event, svgNode) {
 
             var p = svgNode.node.createSVGPoint();
@@ -144,9 +143,7 @@
             p.y = event.clientY;
 
             return p;
-
         };
-
 
         /**
          * add a new <g> element to the paper
@@ -191,7 +188,6 @@
                 // load <g> transform matrix
                 gElement.transform(matrixString);
 
-
             } else {
                 // initial set <g transform="matrix(1,0,0,1,0,0)">
                 gElement.transform('matrix');
@@ -218,9 +214,8 @@
                 state: 'none',
                 stateTarget: null,
                 stateOrigin: null,
-                stateTf: null,
+                stateTf: null
             };
-
 
             // create an element with all required properties
             var item = {
@@ -235,9 +230,7 @@
 
             // return our element
             return item;
-
         };
-
 
         /**
          * create some handler functions for our mouse actions
@@ -294,7 +287,6 @@
                     zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
 
                 }
-
             };
 
             var handleMouseMove = function handleMouseMove (event) {
@@ -368,7 +360,6 @@
                 }
 
                 zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
-
             };
 
             return {
@@ -377,14 +368,13 @@
                 "mouseMove": handleMouseMove,
                 "mouseWheel": handleMouseWheel
             };
-
         };
 
 
         /**
-             * Register handlers
-             * desktop and mobile (?)
-             */
+         * Register handlers
+         * desktop and mobile (?)
+         */
         var _setupHandlers = function setupHandlers(svgElement, handlerFunctions) {
 
             // mobile
@@ -407,7 +397,6 @@
                 }
 
             }
-
         };
 
         /**
@@ -425,7 +414,6 @@
             else {
                 svgElement.removeEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false);
             }
-
         };
 
         /* our global zpd function */
@@ -472,7 +460,7 @@
 
             switch (options) {
 
-                case'destroy':
+                case 'destroy':
 
                     // remove event handlers
                     _tearDownHandlers(self.node, zpdElement.handlerFunctions);
@@ -543,7 +531,6 @@
                     }
                 });
             }
-
         };
 
 
@@ -573,7 +560,6 @@
                 });
 
             }
-
         };
 
 
