@@ -40,6 +40,8 @@
             <button id="zoom1x">Zoom To 1x</button>
             <br/>
 
+            <button id="save">Save</button>
+            <br/>
 
             <button id="destroy">Destroy</button>
             <button id="reapply">Re-Apply</button>
@@ -91,10 +93,16 @@
             };
             document.getElementById('zoom2x').onmousedown = function () {
                 paper.zoomTo(2, 400);
-            }
+            };
             document.getElementById('zoom1x').onmousedown = function () {
                 paper.zoomTo(1, 400);
-            }
+            };
+            document.getElementById('save').onmousedown = function () {
+                paper.zpd('save', function (err, data) {
+                    var output = JSON.stringify(data);
+                    alert('Save Data:' + output);
+                });
+            };
             document.onkeydown = function (e) {
                 switch(e.keyCode) {
                     case 37: // left
@@ -110,15 +118,15 @@
                         paper.panTo('+0', '+10');
                         break;
                 }
-            }
+            };
 
             document.getElementById('destroy').onmousedown = function () {
                 paper.zpd('destroy');
-            }
+            };
 
             document.getElementById('reapply').onmousedown = function () {
                applyZpd();
-            }
+            };
 
             // settings
             // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });

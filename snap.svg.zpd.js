@@ -475,7 +475,7 @@
 
                 case 'save':
 
-                    var g = document.getElementById(snapsvgzpd.preUniqueId + self.id);
+                    var g = document.getElementById(snapsvgzpd.uniqueIdPrefix + self.id);
 
                     var returnValue = g.getCTM();
 
