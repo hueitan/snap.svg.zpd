@@ -430,11 +430,23 @@
                 zoomScale: 0.2      // defien zoom sensitivity
             };
 
+            // the situation event of zpd, may be init, reinit, destroy, save, origin
+            var situation,
+                situationState = {
+                    init: 'init',
+                    reinit: 'reinit',
+                    destroy: 'destroy',
+                    save: 'save',
+                    origin: 'origin',
+                    callback: 'callback'
+                };
+
             var zpdElement = null;
 
             // it is also possible to only specify a callback function without any options
             if (typeof options === 'function') {
                 callbackFunc = options;
+                situation = situationState.callback;
             }
 
             // check if element was already initialized
@@ -448,8 +460,10 @@
                     for (var prop in options) {
                         zpdElement.options[prop] = options[prop];
                     }
+                    situation = situationState.reinit;
+                } else if (typeof options === 'string') {
+                    situation = options;
                 }
-
             }
             else {
 
@@ -458,6 +472,9 @@
                     for (var prop2 in options) {
                         zpdOptions[prop2] = options[prop2];
                     }
+                    situation = situationState.init;
+                } else if (typeof options === 'string') {
+                    situation = options;
                 }
 
                 // initialize a new element and save it to our global storage
@@ -469,9 +486,20 @@
                 snapsvgzpd.dataStore[self.id] = zpdElement;
             }
 
-            switch (options) {
+            switch (situation) {
 
-                case 'destroy':
+                case situationState.init:
+                case situationState.reinit:
+                case situationState.callback:
+
+                    // callback
+                    if (callbackFunc) {
+                        callbackFunc(null, zpdElement);
+                    }
+
+                    return;
+
+                case situationState.destroy:
 
                     // remove event handlers
                     _tearDownHandlers(self.node, zpdElement.handlerFunctions);
@@ -482,9 +510,14 @@
                     // remove the object from our internal storage
                     delete snapsvgzpd.dataStore[self.id];
 
+                    // callback
+                    if (callbackFunc) {
+                        callbackFunc(null, zpdElement);
+                    }
+
                     return; // exit all
 
-                case 'save':
+                case situationState.save:
 
                     var g = document.getElementById(snapsvgzpd.uniqueIdPrefix + self.id);
 
@@ -497,14 +530,14 @@
 
                     return returnValue;
 
-                case 'origin':
+                case situationState.origin:
 
                     // back to origin location
                     self.zoomTo(1, 1000);
 
                     // callback
                     if (callbackFunc) {
-                        callbackFunc(null, returnValue);
+                        callbackFunc(null, zpdElement);
                     }
 
                     return;
