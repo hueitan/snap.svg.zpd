@@ -61,6 +61,10 @@ paper.zpd(function (err, paper) {
 
     number: Zoom sensitivity (default 0.2)
 
+#### zoomThreshold
+
+    array: min and max zoom level threshold [min, max] (default null)
+
 ### More
 
 #### paper.zpd('destroy')

@@ -41,6 +41,7 @@
             <br/>
 
             <button id="save">Save</button>
+            <button id="threshold">Zoom Threshold [0.5,3]</button>
             <br/>
 
             <button id="destroy">Destroy</button>
@@ -102,6 +103,10 @@
                     var output = JSON.stringify(data);
                     alert('Save Data:' + output);
                 });
+            };
+            document.getElementById('threshold').onmousedown = function () {
+                paper.zoomTo(1, 400);
+                paper.zpd({ drag: true, zoomThreshold: [0.5, 3] });
             };
             document.onkeydown = function (e) {
                 switch(e.keyCode) {

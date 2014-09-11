@@ -119,7 +119,15 @@
         /**
          * Sets the current transform matrix of an element.
          */
-        var _setCTM = function setCTM(element, matrix) {
+        var _setCTM = function setCTM(element, matrix, threshold) {
+            if (threshold && typeof threshold === 'object') { // array [0.5,2]
+                if (matrix.a <= threshold[0]) {
+                    return;
+                }
+                if (matrix.d >= threshold[1]) {
+                    return;
+                }
+            }
             var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
             element.setAttribute("transform", s);
         };
@@ -353,9 +361,9 @@
                 // Compute new scale matrix in current mouse position
                 var k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 
-                _setCTM(g, g.getCTM().multiply(k));
+                _setCTM(g, g.getCTM().multiply(k), zpdElement.options.zoomThreshold);
 
-                if (typeof(stateTf) == "undefined") {
+                if (typeof(stateTf) == 'undefined') {
                     zpdElement.data.stateTf = g.getCTM().inverse();
                 }
 
@@ -427,7 +435,8 @@
                 pan: true,          // enable or disable panning (default enabled)
                 zoom: true,         // enable or disable zooming (default enabled)
                 drag: false,        // enable or disable dragging (default disabled)
-                zoomScale: 0.2      // defien zoom sensitivity
+                zoomScale: 0.2,     // define zoom sensitivity
+                zoomThreshold: null // define zoom threshold
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin
