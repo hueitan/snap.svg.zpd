@@ -77,21 +77,45 @@
 
 
             // UI improvement needed
+            var intervalF;
+            var clearIntervalF = function () {
+                clearInterval(intervalF);
+            }
             document.getElementById('location').onmousedown = function () {
                 paper.panTo(0, 0);
             };
             document.getElementById('left').onmousedown = function () {
                 paper.panTo('-10');
+                intervalF = setInterval(function () {
+                    paper.panTo('-10');
+                }, 100);
             };
+            document.getElementById('left').onmouseup = clearIntervalF;
+            document.getElementById('left').onmouseleave = clearIntervalF;
             document.getElementById('right').onmousedown = function () {
                 paper.panTo('+10');
+                intervalF = setInterval(function () {
+                    paper.panTo('+10');
+                }, 100);
             };
+            document.getElementById('right').onmouseup = clearIntervalF;
+            document.getElementById('right').onmouseleave = clearIntervalF;
             document.getElementById('up').onmousedown = function () {
                 paper.panTo('+0', '-10');
+                intervalF = setInterval(function () {
+                    paper.panTo('+0', '-10');
+                }, 100);
             };
+            document.getElementById('up').onmouseup = clearIntervalF;
+            document.getElementById('up').onmouseleave = clearIntervalF;
             document.getElementById('down').onmousedown = function () {
                 paper.panTo('+0', '+10');
+                intervalF = setInterval(function () {
+                    paper.panTo('+0', '+10');
+                }, 100);
             };
+            document.getElementById('down').onmouseup = clearIntervalF;
+            document.getElementById('down').onmouseleave = clearIntervalF;
             document.getElementById('zoom2x').onmousedown = function () {
                 paper.zoomTo(2, 400);
             };
