@@ -35,6 +35,9 @@
  * paper.panTo(0, 0); // original location
  * paper.panTo('+10', 0); // move right
  *
+ * // rotate
+ * paper.rotate(15); // rotate 15 deg
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -615,16 +618,46 @@
             }
         };
 
+        /**
+         * rotate the element to a certain rotation
+         */
+        var rotate = function (a, x, y, interval, ease, cb) {
+            // get a reference to the current element
+            var self = this;
+
+            // check if we have this element in our zpd data storage
+            if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
+
+                var zpdElement = snapsvgzpd.dataStore[self.id].element;
+
+                var gMatrix = zpdElement.node.getCTM(),
+                    matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + gMatrix.e + "," + gMatrix.f + ")";
+
+                if (!x || typeof x !== 'number') {
+                    x = self.node.offsetWidth / 2;
+                }
+                if (!y || typeof y !== 'number') {
+                    y = self.node.offsetHeight / 2;
+                }
+
+                // dataStore[me.id].transform(matrixString); // load <g> transform matrix
+                zpdElement.animate({ transform: new Snap.Matrix(gMatrix).rotate(a, x, y) }, interval || 10, ease || null, function () {
+                    if (cb) {
+                        cb(null, zpdElement);
+                    }
+                });
+
+            }
+        };
 
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
-
+        Paper.prototype.rotate = rotate;
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
 
-        /** rotate => snap.svg.zpdr **/
 
         /** UI for zpdr **/
 

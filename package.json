@@ -15,8 +15,9 @@
     "zoom",
     "pan",
     "drag",
+    "rotate",
     "snap.svg",
-    "snap.svg",
+    "snap.svg plugin"
     "plugin"
   ],
   "author": "Huei Tan",

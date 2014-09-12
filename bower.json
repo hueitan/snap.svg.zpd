@@ -12,6 +12,7 @@
     "zoom",
     "pan",
     "drag",
+    "rotate",
     "snap.svg",
     "snap.svg plugin"
   ],

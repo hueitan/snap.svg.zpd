@@ -121,3 +121,13 @@ paper.panTo(100, 100, 3000, mina.bounce, function (err, paper) {
 });
 ```
     x, y (can be number or string with + -), interval (ms optional), mina (optional), callback (optional)
+
+#### rotate
+
+```js
+paper.rotate(15);
+paper.panTo(a, x, y, mina.bounce, function (err, paper) {
+    console.log(paper);
+});
+```
+    a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)

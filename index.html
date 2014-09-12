@@ -35,6 +35,9 @@
             <button id="right">Right</button>
             <br/>
 
+            <button id="rotateL">Rotate -15 deg</button>
+            <button id="rotateR">Rotate 15 deg</button>
+            <br/>
 
             <button id="zoom2x">Zoom To 2x</button>
             <button id="zoom1x">Zoom To 1x</button>
@@ -116,6 +119,20 @@
             };
             document.getElementById('down').onmouseup = clearIntervalF;
             document.getElementById('down').onmouseleave = clearIntervalF;
+            document.getElementById('rotateL').onmousedown = function () {
+                paper.rotate(-15);
+                intervalF = setInterval(function () {
+                    paper.rotate(-15);
+                }, 100);
+            };
+            document.getElementById('rotateL').onmouseup = clearIntervalF;
+            document.getElementById('rotateR').onmousedown = function () {
+                paper.rotate(15);
+                intervalF = setInterval(function () {
+                    paper.rotate(15);
+                }, 100);
+            };
+            document.getElementById('rotateR').onmouseup = clearIntervalF;
             document.getElementById('zoom2x').onmousedown = function () {
                 paper.zoomTo(2, 400);
             };
