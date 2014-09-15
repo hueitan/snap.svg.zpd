@@ -1,6 +1,6 @@
 {
   "name": "snap.svg.zpd",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A zoom/pan/drag plugin for Snap.svg",
   "main": "snap.svg.zpd.js",
   "scripts": {
