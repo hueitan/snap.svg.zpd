@@ -126,6 +126,7 @@
                 }, 100);
             };
             document.getElementById('rotateL').onmouseup = clearIntervalF;
+            document.getElementById('rotateL').onmouseleave = clearIntervalF;
             document.getElementById('rotateR').onmousedown = function () {
                 paper.rotate(15);
                 intervalF = setInterval(function () {
@@ -133,6 +134,7 @@
                 }, 100);
             };
             document.getElementById('rotateR').onmouseup = clearIntervalF;
+            document.getElementById('rotateR').onmouseleave = clearIntervalF;
             document.getElementById('zoom2x').onmousedown = function () {
                 paper.zoomTo(2, 400);
             };
