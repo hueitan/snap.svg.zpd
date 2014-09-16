@@ -5,9 +5,13 @@ A zoom/pan/drag plugin for Snap.svg
 
 This is an an adaptation of Andrea Leofreddi's [SVGPan library](https://code.google.com/p/svgpan/), version 1.2.2, for use as a [Snap.svg](http://snapsvg.io/) plugin.
 
-This usually use on present view only. Not for Storing, modifying the paper.
+This usually use on present view only. Not for Storing or Modifying the paper.
 
-[DEMO](http://huei90.github.io/snap.svg.zpd)
+[DEMO](http://huei90.github.io/snap.svg.zpd) [DEMO2](http://huei90.github.io/snap.svg.zpd/demo2.html)
+
+### In the Wild
+
+Drop me an issue/PR for the showcase
 
 ### Install
 

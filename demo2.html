@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Another DEMO for zoom/pan/drag/rotate plugin using Snap.svg</title>
+    <style>
+        html, body { margin:0; padding:0; overflow:hidden }
+        svg { position:fixed; top:0; left:0; height:100%; width:100% }
+        .dragText {
+            font-size: 100px;
+        }
+        .button {
+            position: fixed;
+            right: 50px;
+            bottom: 50px;
+            z-index: 100;
+        }
+    </style>
+
+    <script src="./lib/snap.svg.js"></script>
+    <script src="./snap.svg.zpd.js"></script>
+</head>
+<body>
+
+<div class="button">
+    <button id="location">To (0,0) Location</button>
+    <br/>
+    <button id="up">Up</button>
+    <button id="down">Down</button>
+    <br/>
+    <button id="left">Left</button>
+    <button id="right">Right</button>
+    <br/>
+
+    <button id="rotateL">Rotate -15 deg</button>
+    <button id="rotateR">Rotate 15 deg</button>
+    <br/>
+
+    <button id="zoom2x">Zoom To 2x</button>
+    <button id="zoom1x">Zoom To 1x</button>
+    <br/>
+
+    <button id="save">Save</button>
+    <button id="threshold">Zoom Threshold [0.5,3]</button>
+    <br/>
+
+    <button id="destroy">Destroy</button>
+    <button id="reapply">Re-Apply</button>
+    <br/>
+    -- or use arrow key --
+    <br/>
+    <span>Selected:</span>
+    <span id="selected"></span>
+</div>
+
+<script>
+
+    var paper = Snap();
+
+    var applyZpd = function() {
+        paper.zpd();
+    };
+
+    var becomeBlack = function () {
+        this.style.fill = '#000000';
+        this.style.stroke = '#000000';
+        this.style.cursor = 'pointer';
+        document.getElementById('selected').textContent = this.getAttribute('title');
+    };
+    var reverseBlack = function () {
+        this.style.fill = '#CCCCCC';
+        this.style.stroke = '#ffffff';
+        document.getElementById('selected').textContent = '';
+    };
+    Snap.load('./lib/malaysia.svg', function (f) {
+        paper.append(f);
+        applyZpd();
+        paper.panTo('+150', '+150');
+
+        var subject = [{id:"BN"},{id:"MY-01"},{id:"MY-02"},{id:"MY-03"},{id:"MY-04"},{id:"MY-05"},{id:"MY-06"},{id:"MY-07"},{id:"MY-08"},{id:"MY-09"},{id:"MY-10"},{id:"MY-11"},{id:"MY-12"},{id:"MY-13"},{id:"MY-15"}];
+        for (var k in subject) {
+            document.getElementById(subject[k].id).onmouseover = becomeBlack;
+            document.getElementById(subject[k].id).onmouseout = reverseBlack;
+        }
+    })
+
+
+    // UI improvement needed
+    var intervalF;
+    var clearIntervalF = function () {
+        clearInterval(intervalF);
+    }
+    document.getElementById('location').onmousedown = function () {
+        paper.panTo(0, 0);
+    };
+    document.getElementById('left').onmousedown = function () {
+        paper.panTo('-10');
+        intervalF = setInterval(function () {
+            paper.panTo('-10');
+        }, 100);
+    };
+    document.getElementById('left').onmouseup = clearIntervalF;
+    document.getElementById('left').onmouseleave = clearIntervalF;
+    document.getElementById('right').onmousedown = function () {
+        paper.panTo('+10');
+        intervalF = setInterval(function () {
+            paper.panTo('+10');
+        }, 100);
+    };
+    document.getElementById('right').onmouseup = clearIntervalF;
+    document.getElementById('right').onmouseleave = clearIntervalF;
+    document.getElementById('up').onmousedown = function () {
+        paper.panTo('+0', '-10');
+        intervalF = setInterval(function () {
+            paper.panTo('+0', '-10');
+        }, 100);
+    };
+    document.getElementById('up').onmouseup = clearIntervalF;
+    document.getElementById('up').onmouseleave = clearIntervalF;
+    document.getElementById('down').onmousedown = function () {
+        paper.panTo('+0', '+10');
+        intervalF = setInterval(function () {
+            paper.panTo('+0', '+10');
+        }, 100);
+    };
+    document.getElementById('down').onmouseup = clearIntervalF;
+    document.getElementById('down').onmouseleave = clearIntervalF;
+    document.getElementById('rotateL').onmousedown = function () {
+        paper.rotate(-15);
+        intervalF = setInterval(function () {
+            paper.rotate(-15);
+        }, 100);
+    };
+    document.getElementById('rotateL').onmouseup = clearIntervalF;
+    document.getElementById('rotateL').onmouseleave = clearIntervalF;
+    document.getElementById('rotateR').onmousedown = function () {
+        paper.rotate(15);
+        intervalF = setInterval(function () {
+            paper.rotate(15);
+        }, 100);
+    };
+    document.getElementById('rotateR').onmouseup = clearIntervalF;
+    document.getElementById('rotateR').onmouseleave = clearIntervalF;
+    document.getElementById('zoom2x').onmousedown = function () {
+        paper.zoomTo(2, 400);
+    };
+    document.getElementById('zoom1x').onmousedown = function () {
+        paper.zoomTo(1, 400);
+    };
+    document.getElementById('save').onmousedown = function () {
+        paper.zpd('save', function (err, data) {
+            var output = JSON.stringify(data);
+            alert('Save Data:' + output);
+        });
+    };
+    document.getElementById('threshold').onmousedown = function () {
+        paper.zoomTo(1, 400);
+        paper.zpd({ drag: true, zoomThreshold: [0.5, 3] });
+    };
+    document.onkeydown = function (e) {
+        switch(e.keyCode) {
+            case 37: // left
+                paper.panTo('-10');
+                break;
+            case 38: // up
+                paper.panTo('+0', '-10');
+                break;
+            case 39: // right
+                paper.panTo('+10');
+                break;
+            case 40: // down
+                paper.panTo('+0', '+10');
+                break;
+        }
+    };
+
+    document.getElementById('destroy').onmousedown = function () {
+        paper.zpd('destroy');
+    };
+
+    document.getElementById('reapply').onmousedown = function () {
+        applyZpd();
+    };
+</script>
+</body>
+
+</html>
