@@ -8,15 +8,20 @@
     <title>Another DEMO for zoom/pan/drag/rotate plugin using Snap.svg</title>
     <style>
         html, body { margin:0; padding:0; overflow:hidden }
-        svg { position:fixed; top:0; left:0; height:100%; width:100% }
-        .dragText {
-            font-size: 100px;
+        svg { position:fixed; top:0; left:0; height:100%; width:100%;
+            background: -webkit-radial-gradient(#7E7A7A, #434141, #000); /* Safari 5.1 to 6.0 */
+            background: -o-radial-gradient(#7E7A7A, #434141, #000); /* For Opera 11.6 to 12.0 */
+            background: -moz-radial-gradient(#7E7A7A, #434141, #000); /* For Firefox 3.6 to 15 */
+            background: radial-gradient(#7E7A7A, #434141, #000); /* Standard syntax */
         }
         .button {
             position: fixed;
             right: 50px;
             bottom: 50px;
             z-index: 100;
+        }
+        #selected{
+            color: white;
         }
     </style>
 
@@ -52,7 +57,7 @@
     <br/>
     -- or use arrow key --
     <br/>
-    <span>Selected:</span>
+    <span style="color: white;">Selected:</span>
     <span id="selected"></span>
 </div>
 
@@ -64,35 +69,63 @@
         paper.zpd();
     };
 
-    var becomeBlack = function () {
+    var becomeBlack = function (e) {
         this.style.fill = '#000000';
         this.style.stroke = '#000000';
         this.style.cursor = 'pointer';
-        document.getElementById('selected').textContent = this.getAttribute('title');
+        var text = document.getElementById('selected').textContent = this.getAttribute('title');
+        showLabel(e, text);
     };
-    var reverseBlack = function () {
+
+    var reverseBlack = function (e) {
         this.style.fill = '#CCCCCC';
         this.style.stroke = '#ffffff';
         document.getElementById('selected').textContent = '';
+        hideLabel(e);
     };
+
+    var tooltip;
+    var showLabel = function (evt, mouseovertext) {
+        tooltip.setAttributeNS(null,"x",evt.clientX+10);
+        tooltip.setAttributeNS(null,"y",evt.clientY+25);
+        tooltip.setAttributeNS(null,"visibility","visible");
+        tooltip.textContent = mouseovertext;
+    };
+
+    var hideLabel = function (evt){
+        tooltip.setAttributeNS(null,"visibility","hidden");
+    };
+
     Snap.load('./lib/malaysia.svg', function (f) {
         paper.append(f);
         applyZpd();
-        paper.panTo('+150', '+150');
+        paper.zoomTo(1.5, 100, null, function () {
+            paper.panTo('+200', '+200');
+        });
 
         var subject = [{id:"BN"},{id:"MY-01"},{id:"MY-02"},{id:"MY-03"},{id:"MY-04"},{id:"MY-05"},{id:"MY-06"},{id:"MY-07"},{id:"MY-08"},{id:"MY-09"},{id:"MY-10"},{id:"MY-11"},{id:"MY-12"},{id:"MY-13"},{id:"MY-15"}];
         for (var k in subject) {
             document.getElementById(subject[k].id).onmouseover = becomeBlack;
             document.getElementById(subject[k].id).onmouseout = reverseBlack;
         }
-    })
+
+        // label: <text x="0" y="15" fill="red">I love SVG!</text>
+        var label = paper.text({
+            fill: 'red'
+        });
+        label.node.id = 'label';
+        tooltip = document.getElementById('label');
+        // Snap.load('./lib/navigation.svg', function (d) {
+        //    paper.append(d);
+        // });
+    });
 
 
     // UI improvement needed
     var intervalF;
     var clearIntervalF = function () {
         clearInterval(intervalF);
-    }
+    };
     document.getElementById('location').onmousedown = function () {
         paper.panTo(0, 0);
     };
