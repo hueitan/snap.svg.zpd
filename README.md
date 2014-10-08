@@ -135,3 +135,8 @@ paper.panTo(a, x, y, mina.bounce, function (err, paper) {
 });
 ```
     a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)
+    
+### Contributor List
+
+[Huei Tan](https://github.com/huei90) <br/>
+[Ramon Saccilotto](https://github.com/tikiatua)
