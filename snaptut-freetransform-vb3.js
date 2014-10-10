@@ -1,4 +1,6 @@
 
+// code from http://svg.dabbles.info/snaptut-freetransform-viewbox.html
+
 (function() {
 	var lineAttributes = { stroke: 'red', strokeWidth: 2, strokeDasharray: "5,5" };
 
