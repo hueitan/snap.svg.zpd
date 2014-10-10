@@ -8,7 +8,7 @@ This is an an adaptation of Andrea Leofreddi's [SVGPan library](https://code.goo
 This usually use on present view only. Not for Storing or Modifying the paper.
 
 [DEMO](http://huei90.github.io/snap.svg.zpd) [DEMO2](http://huei90.github.io/snap.svg.zpd/demo2.html)
-
+[DEMO3](http://huei90.github.io/snap.svg.zpd/reservation_seat.html)
 ### In the Wild
 
 Drop me an issue/PR for the showcase

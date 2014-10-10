@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Seat Reservation DEMO</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden
+        }
+
+        svg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #data {
+            position: fixed;
+            right: 100px;
+            top: 300px;
+            color: gray;
+            background: white;
+            z-index: 10000;
+            font-size: 30px;
+        }
+    </style>
+
+    <script src="./lib/snap.svg.js"></script>
+    <script src="./snap.svg.zpd.js"></script>
+</head>
+<body>
+
+<div id="data">
+
+</div>
+
+<script>
+    // prototype
+    (function (Snap) {
+        Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
+
+            Paper.prototype.isSomeoneSelected = false;
+            Paper.prototype.selectedSeat = null;
+            Paper.prototype.insertSeat = function (seats) {
+                var self = this;
+                // seat is array like object with [{cx:10,cy:10},{cx:50,cy:50}]
+                seats.forEach(function (seat) {
+                    if (seat.occupied) { // occupied
+                        self.circle(seat.cx, seat.cy, 20)
+                                .attr({stroke: 'gray', fill: 'gray'})
+                                .addClass('seat')
+                    } else {
+                        //self.attr({fill: 'white'})
+
+                     self.circle(seat.cx, seat.cy, 20)
+                            .attr({stroke: 'gray', fill: 'white'})
+                            .addClass('seat')
+                            .click(function () {
+                                self.selectSeat(this, seat);
+                            })
+                            .hover(function () {
+                                this.node.style.cursor = 'pointer';
+                                if (!self.isSomeoneSelected) {
+                                    this.attr({fill: 'red'});
+                                } else if (self.selectedSeat != this) {
+                                    this.attr({fill: 'red'});
+                                }
+                            }, function () {
+                                if (!self.isSomeoneSelected) {
+                                    this.attr({fill: 'white'});
+                                } else if (self.selectedSeat != this) {
+                                    this.attr({fill: 'white'});
+                                }
+                            })
+                            .drag(function (dx, dy, posx, posy) {
+                                // this.attr({ cx: posx, cy: posy }); // basic drag, you would want to adjust to take care of where you grab etc.
+                            },
+                            function () {
+                                console.log("Move started");
+                            },
+                            function () {
+                                console.log("Move stopped");
+                            });
+                    }
+                });
+            };
+
+            Paper.prototype.selectSeat = function (node, seat) {
+                var self = this;
+                if (self.selectedSeat == node) {
+                    self.deSelectSeat(self.selectedSeat);
+                    return;
+                }
+                if (self.selectedSeat) {
+                    self.deSelectSeat(self.selectedSeat);
+                }
+
+                self.selectedSeat = node;
+                node.attr({fill: 'blue'});
+                document.getElementById('data').textContent = 'you are select seat: ' + seat.name;
+                self.isSomeoneSelected = true;
+                // console.log('you are select seat: ' + seat.name);
+            };
+            Paper.prototype.deSelectSeat = function (node) {
+                var self = this;
+                node.attr({fill: 'white'});
+                document.getElementById('data').textContent = '';
+                self.isSomeoneSelected = false;
+                self.selectedSeat = null;
+                // console.log('you are select seat: ' + seat.name);
+            };
+            Paper.prototype.insertStage = function () {
+                this.rect(300,100, 400,100).attr({fill:'red'});
+                this.text(450, 165, 'Stage').node.style.fontSize = '50px';
+            }
+        });
+    })(Snap);
+</script>
+
+<script>
+    // execute program
+    var paper = Snap();
+
+    var applyZpd = function () {
+        paper.zpd({drag: false});
+    };
+
+    paper.insertStage();
+    // [{cx:10,cy:10},{cx:20,cy:20}];
+    paper.insertSeat([
+        {cx: 300, cy: 300, name: 'A1', occupied: false},{cx: 350, cy: 300, name: 'B1', occupied: true},{cx: 400, cy: 300, name: 'C1', occupied: false},{cx: 450, cy: 300, name: 'D1', occupied: true},{cx: 500, cy: 300, name: 'E1', occupied: false},{cx: 550, cy: 300, name: 'F1', occupied: false},{cx: 600, cy: 300, name: 'H1', occupied: false},{cx: 650, cy: 300, name: 'I1', occupied: false},{cx:700, cy: 300, name: 'J1', occupied: true},
+        {cx: 300, cy: 350, name: 'A2', occupied: false},{cx: 350, cy: 350, name: 'B2', occupied: false},{cx: 400, cy: 350, name: 'C2', occupied: true},{cx: 450, cy: 350, name: 'D2', occupied: false},{cx: 500, cy: 350, name: 'E2', occupied: false},{cx: 550, cy: 350, name: 'F2', occupied: false},{cx: 600, cy: 350, name: 'H2', occupied: true},{cx: 650, cy: 350, name: 'I2', occupied: false},{cx:700, cy: 350, name: 'J2', occupied: false},
+        {cx: 300, cy: 400, name: 'A3', occupied: true},{cx: 350, cy: 400, name: 'B3', occupied: false},{cx: 400, cy: 400, name: 'C3', occupied: false},{cx: 450, cy: 400, name: 'D3', occupied: false},{cx: 500, cy: 400, name: 'E3', occupied: false},{cx: 550, cy: 400, name: 'F3', occupied: false},{cx: 600, cy: 400, name: 'H3', occupied: false},{cx: 650, cy: 400, name: 'I3', occupied: true},{cx:700, cy: 400, name: 'J3', occupied: false},
+        {cx: 300, cy: 450, name: 'A4', occupied: false},{cx: 350, cy: 450, name: 'B4', occupied: false},{cx: 400, cy: 450, name: 'C4', occupied: true},{cx: 450, cy: 450, name: 'D4', occupied: false},{cx: 500, cy: 450, name: 'E4', occupied: false},{cx: 550, cy: 450, name: 'F4', occupied: false},{cx: 600, cy: 450, name: 'H4', occupied: false},{cx: 650, cy: 450, name: 'I4', occupied: false},{cx:700, cy: 450, name: 'J4', occupied: false},
+        {cx: 300, cy: 500, name: 'A5', occupied: false},{cx: 350, cy: 500, name: 'B5', occupied: true},{cx: 400, cy: 500, name: 'C5', occupied: false},{cx: 450, cy: 500, name: 'D5', occupied: false},{cx: 500, cy: 500, name: 'E5', occupied: false},{cx: 550, cy: 500, name: 'F5', occupied: false},{cx: 600, cy: 500, name: 'H5', occupied: false},{cx: 650, cy: 500, name: 'I5', occupied: false},{cx:700, cy: 500, name: 'J5', occupied: false}
+    ]);
+
+    applyZpd();
+    //    Snap.load('./lib/malaysia.svg', function (f) {
+    //        paper.append(f);
+    //        applyZpd();
+    //        paper.zoomTo(1.5, 100, null, function () {
+    //            paper.panTo('+200', '+200');
+    //        });
+    //
+    //        var subject = [{id:"BN"},{id:"MY-01"},{id:"MY-02"},{id:"MY-03"},{id:"MY-04"},{id:"MY-05"},{id:"MY-06"},{id:"MY-07"},{id:"MY-08"},{id:"MY-09"},{id:"MY-10"},{id:"MY-11"},{id:"MY-12"},{id:"MY-13"},{id:"MY-15"}];
+    //        for (var k in subject) {
+    //            document.getElementById(subject[k].id).onmouseover = becomeBlack;
+    //            document.getElementById(subject[k].id).onmouseout = reverseBlack;
+    //        }
+    //
+    //        // label: <text x="0" y="15" fill="red">I love SVG!</text>
+    //        var label = paper.text({
+    //            fill: 'red'
+    //        });
+    //        label.node.id = 'label';
+    //        tooltip = document.getElementById('label');
+    //        // Snap.load('./lib/navigation.svg', function (d) {
+    //        //    paper.append(d);
+    //        // });
+    //    });
+
+</script>
+</body>
+
+</html>
