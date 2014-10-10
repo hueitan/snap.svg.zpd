@@ -7,8 +7,28 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>A zoom/pan/drag/rotate plugin for Snap.svg</title>
         <style>
-            html, body { margin:0; padding:0; overflow:hidden }
-            svg { position:fixed; top:0; left:0; height:100%; width:100% }
+            html, body { margin:0; padding:0; height: 100%; width: 100%; overflow:hidden }
+            .container {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                bottom: 15px;
+                right: 15px;
+                z-index: 0;
+                background: #e6e6e6;
+            }
+            svg {
+                position: relative;
+                width: 50%;
+                height: 100%;
+                float: left;
+            }
+            #zpd {
+                background: #cccccc;
+            }
+            #zpd2 {
+                background: #dddddd;
+            }
             .dragText {
                 font-size: 100px;
             }
@@ -18,49 +38,55 @@
                 bottom: 50px;
                 z-index: 100;
             }
+            .line {
+                position: absolute;
+                width: 2px;
+                left: 493px;
+                height: 400px;
+                background: blue;
+                z-index: 2;
+                display: block;
+            }
         </style>
 
         <script src="./lib/snap.svg.js"></script>
+        <script src="./lib/hammer.min.js"></script>
         <script src="./snap.svg.zpd.js"></script>
+        <script src="./snap.svg.test.js"></script>
     </head>
     <body>
 
-        <div class="button">
-            <button id="location">To (0,0) Location</button>
-            <br/>
-            <button id="up">Up</button>
-            <button id="down">Down</button>
-            <br/>
-            <button id="left">Left</button>
-            <button id="right">Right</button>
-            <br/>
+        <div class="container">
 
-            <button id="rotateL">Rotate -15 deg</button>
-            <button id="rotateR">Rotate 15 deg</button>
-            <br/>
+            <svg id="zpd" >
+                <defs>
+                    <linearGradient id="Gradient01">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
 
-            <button id="zoom2x">Zoom To 2x</button>
-            <button id="zoom1x">Zoom To 1x</button>
-            <br/>
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient01)"  />
+            </svg>
 
-            <button id="save">Save</button>
-            <button id="threshold">Zoom Threshold [0.5,3]</button>
-            <br/>
+            <svg id="zpd2" viewBox="0 0 200 400">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
 
-            <button id="destroy">Destroy</button>
-            <button id="reapply">Re-Apply</button>
-            <br/>
-            -- or use arrow key --
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
         </div>
 
         <script>
 
-            var paper = Snap();
-
-            var image1 = paper.image('./lib/image1.png',820,270);
-            var image2 = paper.image('./lib/image2.png',100,220, 500,205);
-            var image3 = paper.image('./lib/image3.png',500,100, 400,332.5);
-            var text = paper.text(50, 100, 'drag me').addClass('dragText');
+            var paper = Snap('#zpd');
+            var paper2 = Snap('#zpd2');
 
             /*
                 Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
@@ -72,123 +98,18 @@
             */
 
             var applyZpd = function() {
-                paper.zpd({ drag: true });
+                paper.initZpd();
+
+                paper.snapsvgzpd.node.setAttribute('transform', 'scale(0.5)');
+                paper2.initZpd();
+                //paper.zpd({drag: true});
+                //paper2.zpd({ drag: true });
             };
 
             // run initializer
             applyZpd();
 
 
-            // UI improvement needed
-            var intervalF;
-            var clearIntervalF = function () {
-                clearInterval(intervalF);
-            }
-            document.getElementById('location').onmousedown = function () {
-                paper.panTo(0, 0);
-            };
-            document.getElementById('left').onmousedown = function () {
-                paper.panTo('-10');
-                intervalF = setInterval(function () {
-                    paper.panTo('-10');
-                }, 100);
-            };
-            document.getElementById('left').onmouseup = clearIntervalF;
-            document.getElementById('left').onmouseleave = clearIntervalF;
-            document.getElementById('right').onmousedown = function () {
-                paper.panTo('+10');
-                intervalF = setInterval(function () {
-                    paper.panTo('+10');
-                }, 100);
-            };
-            document.getElementById('right').onmouseup = clearIntervalF;
-            document.getElementById('right').onmouseleave = clearIntervalF;
-            document.getElementById('up').onmousedown = function () {
-                paper.panTo('+0', '-10');
-                intervalF = setInterval(function () {
-                    paper.panTo('+0', '-10');
-                }, 100);
-            };
-            document.getElementById('up').onmouseup = clearIntervalF;
-            document.getElementById('up').onmouseleave = clearIntervalF;
-            document.getElementById('down').onmousedown = function () {
-                paper.panTo('+0', '+10');
-                intervalF = setInterval(function () {
-                    paper.panTo('+0', '+10');
-                }, 100);
-            };
-            document.getElementById('down').onmouseup = clearIntervalF;
-            document.getElementById('down').onmouseleave = clearIntervalF;
-            document.getElementById('rotateL').onmousedown = function () {
-                paper.rotate(-15);
-                intervalF = setInterval(function () {
-                    paper.rotate(-15);
-                }, 100);
-            };
-            document.getElementById('rotateL').onmouseup = clearIntervalF;
-            document.getElementById('rotateL').onmouseleave = clearIntervalF;
-            document.getElementById('rotateR').onmousedown = function () {
-                paper.rotate(15);
-                intervalF = setInterval(function () {
-                    paper.rotate(15);
-                }, 100);
-            };
-            document.getElementById('rotateR').onmouseup = clearIntervalF;
-            document.getElementById('rotateR').onmouseleave = clearIntervalF;
-            document.getElementById('zoom2x').onmousedown = function () {
-                paper.zoomTo(2, 400);
-            };
-            document.getElementById('zoom1x').onmousedown = function () {
-                paper.zoomTo(1, 400);
-            };
-            document.getElementById('save').onmousedown = function () {
-                paper.zpd('save', function (err, data) {
-                    var output = JSON.stringify(data);
-                    alert('Save Data:' + output);
-                });
-            };
-            document.getElementById('threshold').onmousedown = function () {
-                paper.zoomTo(1, 400);
-                paper.zpd({ drag: true, zoomThreshold: [0.5, 3] });
-            };
-            document.onkeydown = function (e) {
-                switch(e.keyCode) {
-                    case 37: // left
-                        paper.panTo('-10');
-                        break;
-                    case 38: // up
-                        paper.panTo('+0', '-10');
-                        break;
-                    case 39: // right
-                        paper.panTo('+10');
-                        break;
-                    case 40: // down
-                        paper.panTo('+0', '+10');
-                        break;
-                }
-            };
-
-            document.getElementById('destroy').onmousedown = function () {
-                paper.zpd('destroy');
-            };
-
-            document.getElementById('reapply').onmousedown = function () {
-               applyZpd();
-            };
-
-            // settings
-            // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
-            // paper.zpd(function (err, paper) { console.log(paper); });
-            // paper.zpd({ zoom: false }, function (err, paper) { console.log(paper); });
-
-            // zoomTo
-            // paper.zoomTo(1.5, 1000, mina.bounce, function (err, paper) { console.log(paper); });
-
-            // destroy
-            // paper.zpd('destroy');
-
-            // load
-            // paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}});
         </script>
     </body>
 
