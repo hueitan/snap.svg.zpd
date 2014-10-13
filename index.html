@@ -20,7 +20,7 @@
             svg {
                 position: relative;
                 width: 50%;
-                height: 100%;
+                height: 50%;
                 float: left;
             }
             #zpd {
@@ -28,6 +28,12 @@
             }
             #zpd2 {
                 background: #dddddd;
+            }
+            #zpd3 {
+                background: #dddddd;
+            }
+            #zpd4 {
+                background: #cccccc;
             }
             .dragText {
                 font-size: 100px;
@@ -80,12 +86,36 @@
                 <rect x="0" y="0" width="100" height="20"
                         fill="url(#Gradient02)"  />
             </svg>
+            <svg id="zpd3">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
+            <svg id="zpd4" viewBox="0 0 200 400">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
         </div>
 
         <script>
 
             var paper = Snap('#zpd');
             var paper2 = Snap('#zpd2');
+            var paper3 = Snap('#zpd3');
+            var paper4 = Snap('#zpd4');
 
             /*
                 Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
@@ -98,9 +128,12 @@
 
             var applyZpd = function() {
                 paper.initZpd();
-
-                //paper.snapsvgzpd.node.setAttribute('transform', 'scale(0.5)');
                 paper2.initZpd();
+                paper3.initZpd();
+                paper4.initZpd();
+
+                paper3.snapsvgzpd.node.setAttribute('transform', 'scale(0.5)');
+                paper4.snapsvgzpd.node.setAttribute('transform', 'scale(0.5)');
                 //paper.zpd({drag: true});
                 //paper2.zpd({ drag: true });
             };
