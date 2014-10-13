@@ -19,6 +19,7 @@
 			this.ftInit();
 			var freetransEl = this;
 			var bb = freetransEl.getBBox(0);
+
 			var rotateDragger = this.paper.circle(bb.cx + bb.width + ftOption.handleLength, bb.cy, ftOption.handleRadius ).attr({ fill: ftOption.handleFill });
 			var translateDragger = this.paper.circle(bb.cx, bb.cy, ftOption.handleRadius ).attr({ fill: ftOption.handleFill });
 
