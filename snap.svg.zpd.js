@@ -94,7 +94,7 @@
 	};
 
 	// check if current zoom value is in specified range
-	var _isZoomInAllowedRange = function _isZoomInAllowedRange (zoomValue, options) {
+	var _inAllowedZoomRange = function _inAllowedZoomRange (zoomValue, options) {
 		if (options.hasOwnProperty('zoomMinimum')) {
 			if (zoomValue < options.zoomMinimum) {
 				return false;
@@ -107,7 +107,7 @@
 			}
 		}
 
-		return true;
+		return zoomValue;
 	};
 
 	// get an svg transformation matrix as string representation
@@ -156,17 +156,25 @@
 		// calculate total zooming value
 		var zoomTotal = Math.pow(1 + zpdData.options.zoomScale, deltaTotal);
 
+		// get current zoom in allowed range
+		zoomTotal = _inAllowedZoomRange(zoomTotal, zpdData.options);
+
+		console.group('wheel');
+
+		console.log(zoomTotal);
+
 		// restrict zooming to a certain limit
-		if (_isZoomInAllowedRange(zoomTotal, zpdData.options)) {
+		if (zoomTotal) {
+
+			console.log(zpdData.internal.zoom, zoomTotal);
+
+			console.log("do it");
 
 			// save sum of delta for next mouse wheel event
 			zpdData.internal.delta = deltaTotal;
 
 			// calculate zooming change (previously saved scale and new total scale)
 			var zoomDelta = zpdData.internal.zoom - zoomTotal;
-
-			// calculate the zooming threshold that must be reached to trigger a transformation change
-			var zoomDeltaThreshold = zpdData.options.zoomDeltaThreshold / zpdData.internal.paperMatrix.a;
 
 			// only change if zooming has a certain difference
 			if (zoomDelta > 0.01 || zoomDelta < -0.01) {
@@ -198,6 +206,8 @@
 				zpdData.internal.zoom = zoomTotal;
 			}
 		}
+
+		console.groupEnd();
 	};
 
 	// add event handlers to the paper element
@@ -251,7 +261,6 @@
 				},
 				options: {
 					zoomScale: 1,
-					zoomDeltaThreshold: 0.01,
 					zoomMaximum: 2,
 					zoomMinimum: 0.5
 				}
