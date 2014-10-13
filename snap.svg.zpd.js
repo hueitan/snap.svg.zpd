@@ -34,7 +34,7 @@
 		}
 
 		// save a reference to our node in the paper element
-		paper.snapsvgzpd = zpdGroup;
+		paper.zpd.element = zpdGroup;
 	};
 
 	// remove the supplied node but keep all its children
@@ -51,27 +51,25 @@
 	// handle start of dragging on the paper object (start of panning)
 	var _getCurrentZpdGroupPosition = function _getCurrentZpdGroupPosition (paper) {
 		// get current position of our transformation group
-		var currentPosition = paper.snapsvgzpd.getBBox();
+		var currentPosition = paper.zpd.element.getBBox();
 		// save as attribute in the paper element
-		paper.data.zpd.internal.x = currentPosition.x;
-		paper.data.zpd.internal.y = currentPosition.y;
-		paper.data.zpd.internal.cx = currentPosition.cx;
-		paper.data.zpd.internal.cy = currentPosition.cy;
+		paper.zpd.internal.x = currentPosition.x;
+		paper.zpd.internal.y = currentPosition.y;
+		paper.zpd.internal.cx = currentPosition.cx;
+		paper.zpd.internal.cy = currentPosition.cy;
 	};
 
 	var _handlePaperDragStart = function _handlePaperDragStart() {
 		// retrieve the transformation matrix of the zpd-element relative to the paper (svg) element
-		this.data.zpd.internal.zpdMatrix = this.snapsvgzpd.node.getTransformToElement(this.node);
+		this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
 
 		// get the local paper transformation matrix (from view-port and view-box settings)
-		this.data.zpd.internal.paperMatrix = this.node.getCTM();
-
+		this.zpd.internal.paperMatrix = this.node.getCTM();
 	};
 
 	var _handlePaperDragEnd = function _handlePaperDragEnd () {
 		// clear saved tranlsation matrices
-		this.data.zpd.internal.zpdMatrix = null;
-		this.data.zpd.internal.paperMatrix = null;
+		this.zpd.internal.zpdMatrix = null;
 	};
 
 	// handle mouse drag on paper object (panning action)
@@ -80,14 +78,14 @@
 
 		// calculate translation relative to paper view port and viewbox scaling
 		// note: dx/dy are delta of coordinates relative to drag start
-		var translateX = dx / paper.data.zpd.internal.paperMatrix.a;
-		var translateY = dy / paper.data.zpd.internal.paperMatrix.d;
+		var translateX = dx / paper.zpd.internal.paperMatrix.a;
+		var translateY = dy / paper.zpd.internal.paperMatrix.d;
 
 		// create our translation matrix in the paper scope (use a base matrix 0,0, .. and apply scaled translations)
-		var matrixInPaperScope = paper.data.zpd.internal.baseMatrix.translate(translateX, translateY);
+		var matrixInPaperScope = paper.zpd.internal.baseMatrix.translate(translateX, translateY);
 
 		// apply the initial zpd-group transformation matrix after the new translation matrix
-		var newZpdTranslationMatrix = matrixInPaperScope.multiply(paper.data.zpd.internal.zpdMatrix);
+		var newZpdTranslationMatrix = matrixInPaperScope.multiply(paper.zpd.internal.zpdMatrix);
 
 		// apply the new matrix to the zpd element
 		paper.applyZpdTransformation(newZpdTranslationMatrix);
@@ -129,14 +127,6 @@
 		// initialize wheeling delta
 		var delta = 0;
 
-		// get a reference to our zpd object
-		var zpdData = paper.data.zpd;
-
-		// get the current paper transformation matrix
-		if (!zpdData.internal.paperMatrix) {
-			zpdData.internal.paperMatrix = paper.node.getCTM();
-		}
-
 		// get 'amount' of scrolling
 		if (event.wheelDelta) {
 			delta = event.wheelDelta / 360;  // Chrome/Safari
@@ -145,36 +135,29 @@
 			delta = event.detail / - 9;      // Mozilla
 		}
 
-		delta = delta / zpdData.internal.paperMatrix.a;
+		// adapt the effect of wheeling to current svg-scaling
+		// delta = delta / paper.zpd.internal.zoomMultiplier;
 
 		// use previously stored delta to add up zooming
-		var deltaTotal = zpdData.internal.delta + delta;
+		var deltaTotal = paper.zpd.internal.delta + delta;
 
-		// calculate current scaling value
-		var zoomCurrent = Math.pow(1 + zpdData.options.zoomScale, delta);
+		// calculate current scaling value (from delta between two-mouse-wheel events)
+		var zoomCurrent = Math.pow(1 + paper.zpd.options.zoomScale, delta);
 
 		// calculate total zooming value
-		var zoomTotal = Math.pow(1 + zpdData.options.zoomScale, deltaTotal);
+		var zoomTotal = paper.zpd.internal.zoom * zoomCurrent;
 
 		// get current zoom in allowed range
-		zoomTotal = _inAllowedZoomRange(zoomTotal, zpdData.options);
-
-		console.group('wheel');
-
-		console.log(zoomTotal);
+		zoomTotal = _inAllowedZoomRange(zoomTotal, paper.zpd.options);
 
 		// restrict zooming to a certain limit
 		if (zoomTotal) {
 
-			console.log(zpdData.internal.zoom, zoomTotal);
-
-			console.log("do it");
-
 			// save sum of delta for next mouse wheel event
-			zpdData.internal.delta = deltaTotal;
+			paper.zpd.internal.delta = deltaTotal;
 
 			// calculate zooming change (previously saved scale and new total scale)
-			var zoomDelta = zpdData.internal.zoom - zoomTotal;
+			var zoomDelta = paper.zpd.internal.zoom - zoomTotal;
 
 			// only change if zooming has a certain difference
 			if (zoomDelta > 0.01 || zoomDelta < -0.01) {
@@ -188,13 +171,14 @@
 				p.y = event.clientY - paperMatrixToScreen.f;
 
 				// get current transform matrix for element (relative to svg element)
-				var zpdTransformationMatrix = paper.snapsvgzpd.node.getTransformToElement(paper.node);
+				var zpdTransformationMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
 
 				// transform the point into the paper-coordinates
-				p = p.matrixTransform(zpdData.internal.paperMatrix.inverse());
+				p = p.matrixTransform(paper.zpd.internal.paperMatrix.inverse());
+				// p = p.matrixTransform(zpdTransformationMatrix.inverse());
 
 				// scale and move the current element
-				var scaleTransformation = zpdData.internal.baseMatrix.translate(p.x, p.y).scale(zoomCurrent).translate(-p.x, -p.y);
+				var scaleTransformation = paper.zpd.internal.baseMatrix.translate(p.x, p.y).scale(zoomCurrent).translate(-p.x, -p.y);
 
 				// apply the scale and translate and then the previous transformation
 				var matrix = scaleTransformation.multiply(zpdTransformationMatrix);
@@ -203,11 +187,10 @@
 				paper.applyZpdTransformation(matrix);
 
 				// save total zoom for next wheel event
-				zpdData.internal.zoom = zoomTotal;
+				paper.zpd.internal.zoom = zoomTotal;
 			}
 		}
 
-		console.groupEnd();
 	};
 
 	// add event handlers to the paper element
@@ -249,12 +232,12 @@
 
 		// initialize the zpd functionality on a paper lement
 		Paper.prototype.initZpd = function initZpd() {
+
 			// add a zpd-data element to this paper object
-			this.data.zpd = {
+			this.zpd = {
 				internal: {
 					delta: 0,
 					zoom: 1,
-					zoomMultiplier: 1,
 					baseMatrix: null,
 					paperMatrix: null,
 					zpdMatrix: null
@@ -275,18 +258,22 @@
 			_addZpdPaperEventHandlers(this);
 
 			// add a base matrix and a base transform for later use
-			this.data.zpd.internal.baseMatrix = this.node.createSVGMatrix();
+			this.zpd.internal.baseMatrix = this.node.createSVGMatrix();
+
+			// get the svg transformation matrix and the zoom multiplier for it
+			this.zpd.internal.paperMatrix = this.node.getCTM();
+			this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
 
 		};
 
 		// remove the zpd functionality from a paper element
 		Paper.prototype.destroyZpd = function destroyZpd() {
 			// check if zpd group has been initialized on the paper element
-			if (this.hasOwnProperty('snapsvgzpd')) {
+			if (this.hasOwnProperty('zpdElement')) {
 				// remove our custom eventhandlers
 				_removeZpdPaperEventHandlers(this);
 				// remove encapsulating transformation group
-				_removeNodeKeepContent(this.snapsvgzpd);
+				_removeNodeKeepContent(this.zpd.element);
 			}
 		};
 
@@ -299,7 +286,7 @@
 			transformationString = _getSvgMatrixAsString(transformMatrix);
 
 			// apply the transformation
-			this.snapsvgzpd.node.setAttribute('transform', transformationString);
+			this.zpd.element.node.setAttribute('transform', transformationString);
 
 			// return the transformation string (if anyone would need it)
 			return transformationString;
@@ -309,7 +296,7 @@
 		Paper.prototype.rotate = function rotate(amount) {
 			// TODO: this is still gonna need some work
 			_getCurrentZpdGroupPosition(this);
-			this.data.zpd.transformation.rotation += amount;
+			this.zpd.transformation.rotation += amount;
 			this.applyZpdTransformation();
 		};
 
