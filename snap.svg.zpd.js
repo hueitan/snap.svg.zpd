@@ -35,6 +35,9 @@
 
 		// save a reference to our node in the paper element
 		paper.zpd.element = zpdGroup;
+
+		// create an svg point that can be used in events as reference of the drawing area
+		paper.zpd.point = paper.node.createSVGPoint();
 	};
 
 	// remove the supplied node but keep all its children
@@ -48,23 +51,14 @@
 		node.parentElement.removeChild(node);
 	};
 
-	// handle start of dragging on the paper object (start of panning)
-	var _getCurrentZpdGroupPosition = function _getCurrentZpdGroupPosition (paper) {
-		// get current position of our transformation group
-		var currentPosition = paper.zpd.element.getBBox();
-		// save as attribute in the paper element
-		paper.zpd.internal.x = currentPosition.x;
-		paper.zpd.internal.y = currentPosition.y;
-		paper.zpd.internal.cx = currentPosition.cx;
-		paper.zpd.internal.cy = currentPosition.cy;
-	};
-
 	var _handlePaperDragStart = function _handlePaperDragStart() {
 		// retrieve the transformation matrix of the zpd-element relative to the paper (svg) element
 		this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
 
 		// get the local paper transformation matrix (from view-port and view-box settings)
-		this.zpd.internal.paperMatrix = this.node.getCTM();
+		// note: svg.node.getCTM() will return null in firefox -> we can use this.node.getScreenCTM() for dragging
+		//       as we only require the scale-change resulting from view-port, view-box settings
+		this.zpd.internal.paperMatrix = this.node.getCTM() || this.node.getScreenCTM();
 	};
 
 	var _handlePaperDragEnd = function _handlePaperDragEnd () {
@@ -98,19 +92,17 @@
 				return false;
 			}
 		}
-
 		if (options.hasOwnProperty('zoomMaximum')) {
 			if (zoomValue > options.zoomMaximum) {
 				return false;
 			}
 		}
-
 		return zoomValue;
 	};
 
 	// get an svg transformation matrix as string representation
 	var _getSvgMatrixAsString = function _getMatrixAsString (matrix) {
-		return "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
+		return 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
 	};
 
 	// get a mouse wheel hander function with reference to the paper object
@@ -122,7 +114,12 @@
 		}
 
 		// get paper element from current element (attached by .bind to the event handler)
-		paper = this;
+		var paper = this;
+
+		// get paper matrix if not already initialized
+		if (!paper.zpd.internal.paperMatrix) {
+			paper.zpd.internal.paperMatrix = paper.node.getCTM() || paper.node.getScreenCTM();
+		}
 
 		// initialize wheeling delta
 		var delta = 0;
@@ -134,9 +131,6 @@
 		else {
 			delta = event.detail / - 9;      // Mozilla
 		}
-
-		// adapt the effect of wheeling to current svg-scaling
-		// delta = delta / paper.zpd.internal.zoomMultiplier;
 
 		// use previously stored delta to add up zooming
 		var deltaTotal = paper.zpd.internal.delta + delta;
@@ -165,48 +159,46 @@
 				// get the position of the paper element relative to the screen
 				var paperMatrixToScreen = paper.node.getScreenCTM();
 
+				// get a reference to our existing svg point
+				var p = paper.zpd.point;
+
 				// get coordinates relative to the svg-paper-element
-				var p = paper.node.createSVGPoint();
-				p.x = event.clientX - paperMatrixToScreen.e;
-				p.y = event.clientY - paperMatrixToScreen.f;
+				p.x = event.clientX;
+				p.y = event.clientY;
 
 				// get current transform matrix for element (relative to svg element)
 				var zpdTransformationMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
 
-				// transform the point into the paper-coordinates
-				p = p.matrixTransform(paper.zpd.internal.paperMatrix.inverse());
-				// p = p.matrixTransform(zpdTransformationMatrix.inverse());
+				// transform the mouse cursor point into the paper-coordinates
+				p = p.matrixTransform(paperMatrixToScreen.inverse());
 
-				// scale and move the current element
-				var scaleTransformation = paper.zpd.internal.baseMatrix.translate(p.x, p.y).scale(zoomCurrent).translate(-p.x, -p.y);
+				// transform the point from paper-coordinates to zpd-group coordinates
+				p = p.matrixTransform(zpdTransformationMatrix.inverse());
 
-				// apply the scale and translate and then the previous transformation
-				var matrix = scaleTransformation.multiply(zpdTransformationMatrix);
+				// apply scale and translate scale to the current transformation matrix
+				var newMatrix = zpdTransformationMatrix.translate(p.x, p.y).scale(zoomCurrent).translate(-p.x, -p.y);
 
 				// apply the transformation to our zpd element
-				paper.applyZpdTransformation(matrix);
+				paper.applyZpdTransformation(newMatrix);
 
 				// save total zoom for next wheel event
 				paper.zpd.internal.zoom = zoomTotal;
 			}
 		}
-
 	};
 
 	// add event handlers to the paper element
 	var _addZpdPaperEventHandlers = function _addZpdPaperEventHandlers(paper) {
 		paper.drag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
-		paper.mousewheel(_handleMouseWheel);
+		paper.zpd.internal.mouseWheelHandler = _handleMouseWheel.bind(paper);
+		paper.mousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
 
 	// remove event handlers from the paper element
 	var _removeZpdPaperEventHandlers = function _removeZpdPaperEventHandlers(paper) {
 		paper.undrag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
-		paper.unmousewheel(_handleMouseWheel);
+		paper.unmousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
-
-	// empty function (mainly for event handlers)
-	var noopFunction = function () {};
 
 	Snap.plugin( function( Snap, Element, Paper, global ) {
 
@@ -215,9 +207,9 @@
 			Paper.prototype.mousewheel = function mousewheel(handler) {
 				if (this.node.addEventListener) {
 					// IE9, Chrome, Safari, Opera
-					this.node.addEventListener('mousewheel', handler.bind(this), false);
+					this.node.addEventListener('mousewheel', handler, false);
 					// Firefox
-					this.node.addEventListener('DOMMouseScroll', handler.bind(this), false);
+					this.node.addEventListener('DOMMouseScroll', handler, false);
 				}
 			};
 			Paper.prototype.unmousewheel = function unmousewheel(handler) {
@@ -240,7 +232,8 @@
 					zoom: 1,
 					baseMatrix: null,
 					paperMatrix: null,
-					zpdMatrix: null
+					zpdMatrix: null,
+					mouseWheelHandler: null
 				},
 				options: {
 					zoomScale: 1,
@@ -269,11 +262,11 @@
 		// remove the zpd functionality from a paper element
 		Paper.prototype.destroyZpd = function destroyZpd() {
 			// check if zpd group has been initialized on the paper element
-			if (this.hasOwnProperty('zpdElement')) {
+			if (this.hasOwnProperty('zpd')) {
 				// remove our custom eventhandlers
 				_removeZpdPaperEventHandlers(this);
 				// remove encapsulating transformation group
-				_removeNodeKeepContent(this.zpd.element);
+				_removeNodeKeepContent(this.zpd.element.node);
 			}
 		};
 

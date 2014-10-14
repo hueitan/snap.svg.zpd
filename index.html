@@ -12,10 +12,17 @@
                 position: absolute;
                 top: 15px;
                 left: 15px;
-                bottom: 15px;
+                bottom: 80px;
                 right: 15px;
                 z-index: 0;
                 background: #e6e6e6;
+            }
+            .buttons {
+                position: absolute;
+                bottom: 20px;
+                height: 40px;
+                left: 15px;
+                right: 15px;
             }
             svg {
                 position: relative;
@@ -110,6 +117,10 @@
             </svg>
         </div>
 
+        <div class="buttons">
+            <button onclick="removeZpdHandlers()">remove zpd handlers</button>
+        </div>
+
         <script>
 
             var paper = Snap('#zpd');
@@ -134,13 +145,18 @@
 
                 paper3.zpd.element.node.setAttribute('transform', 'scale(0.5)');
                 paper4.zpd.element.node.setAttribute('transform', 'scale(0.5)');
-                //paper.zpd({drag: true});
-                //paper2.zpd({ drag: true });
+
             };
 
             // run initializer
             applyZpd();
 
+            var removeZpdHandlers = function () {
+                paper.destroyZpd();
+                paper2.destroyZpd();
+                paper3.destroyZpd();
+                paper4.destroyZpd();
+            }
 
         </script>
     </body>
