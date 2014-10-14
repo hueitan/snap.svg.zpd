@@ -86,18 +86,19 @@
 	};
 
 	// check if current zoom value is in specified range
-	var _inAllowedZoomRange = function _inAllowedZoomRange (zoomValue, options) {
+	var _inAllowedZoomRange = function _inAllowedZoomRange (zoomCurrent, zoomTotalBefore, options) {
+		var zoomTotalNow = zoomCurrent * zoomTotalBefore;
 		if (options.hasOwnProperty('zoomMinimum')) {
-			if (zoomValue < options.zoomMinimum) {
-				return false;
+			if (zoomTotalNow < options.zoomMinimum) {
+				return 0;
 			}
 		}
 		if (options.hasOwnProperty('zoomMaximum')) {
-			if (zoomValue > options.zoomMaximum) {
-				return false;
+			if (zoomTotalNow > options.zoomMaximum) {
+				return 0;
 			}
 		}
-		return zoomValue;
+		return zoomCurrent;
 	};
 
 	// get an svg transformation matrix as string representation
@@ -107,11 +108,6 @@
 
 	// get a mouse wheel hander function with reference to the paper object
 	var _handleMouseWheel = function _handleMouseWheel(event) {
-		// prevent scrolling on mousewheel
-		if (event.preventDefault) {
-			// note: pass in eventHandler to prevent for firefox
-			event.preventDefault(event);
-		}
 
 		// get paper element from current element (attached by .bind to the event handler)
 		var paper = this;
@@ -128,8 +124,10 @@
 		if (event.wheelDelta) {
 			delta = event.wheelDelta / 360;  // Chrome/Safari
 		}
-		else {
-			delta = event.detail / - 9;      // Mozilla
+		else if (event.detail){
+			delta = event.detail / - 9;      // Firefox
+		} else {
+			delta = - 1/120 * event.deltaY;	// newer Firefox-Browsers
 		}
 
 		// use previously stored delta to add up zooming
@@ -138,11 +136,11 @@
 		// calculate current scaling value (from delta between two-mouse-wheel events)
 		var zoomCurrent = Math.pow(1 + paper.zpd.options.zoomScale, delta);
 
+		// TODO: zoom threshold is not yet as smooth as it should be
+		zoomCurrent = _inAllowedZoomRange(zoomCurrent, paper.zpd.internal.zoom , paper.zpd.options);
+
 		// calculate total zooming value
 		var zoomTotal = paper.zpd.internal.zoom * zoomCurrent;
-
-		// get current zoom in allowed range
-		zoomTotal = _inAllowedZoomRange(zoomTotal, paper.zpd.options);
 
 		// restrict zooming to a certain limit
 		if (zoomTotal) {
@@ -154,6 +152,7 @@
 			var zoomDelta = paper.zpd.internal.zoom - zoomTotal;
 
 			// only change if zooming has a certain difference
+			// TODO: zooming is not yet as smooth as it should be
 			if (zoomDelta > 0.01 || zoomDelta < -0.01) {
 
 				// get the position of the paper element relative to the screen
@@ -185,6 +184,21 @@
 				paper.zpd.internal.zoom = zoomTotal;
 			}
 		}
+
+		// prevent scrolling on mousewheel
+		// note: helper code for IE7/IE8 is not required, as svg only works from IE9 onwards
+		if (event.stopPropagation) {
+			event.stopPropagation();
+		}
+		if (event.preventDefault) {
+			// note: pass in eventHandler to prevent for firefox
+			event.preventDefault(event);
+		}
+		event.cancelBubble = true;
+		event.returnValue = false;
+
+		// cancel mouse-wheel event to prevent page scrolling
+		return false;
 	};
 
 	// add event handlers to the paper element
@@ -209,7 +223,13 @@
 					// IE9, Chrome, Safari, Opera
 					this.node.addEventListener('mousewheel', handler, false);
 					// Firefox
-					this.node.addEventListener('DOMMouseScroll', handler, false);
+					if (document.onwheel !== undefined){
+						console.log('add onwheel handler');
+						this.node.onwheel = handler;
+					} else {
+						this.node.addEventListener('DOMMouseScroll', handler, false);
+					}
+
 				}
 			};
 			Paper.prototype.unmousewheel = function unmousewheel(handler) {
@@ -217,7 +237,11 @@
 					// IE9, Chrome, Safari, Opera
 					this.node.removeEventListener('mousewheel', handler, false);
 					// Firefox
-					this.node.removeEventListener('DOMMouseScroll', handler, false);
+					if (document.onwheel !== undefined) {
+						this.node.onwheel = null;
+					} else {
+						this.node.removeEventListener('DOMMouseScroll', handler, false);
+					}
 				}
 			};
 		}
