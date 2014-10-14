@@ -7,7 +7,7 @@ The plugin was originally based on Andrea Leofreddi's [SVGPan library](https://c
 
 Currently it is only intended to be used to change the display of your svg-elements. We hope to include modifying elements and saving changes for later in the future.
 
-[Please take a look at our demo with responsive svgs](http://huei90.github.io/snap.svg.zpd)
+[Please take a look at our demo with responsive svgs](http://huei90.github.io/snap.svg.zpd/demo_beta.html)
 
 ### BETA-VERSION
 Please note, that this version of the plugin is not yet ready for production. The internal structure of the plugin was completely changed from previous versions. There might also be some api changes.
