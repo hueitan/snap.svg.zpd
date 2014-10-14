@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>A zoom/pan/drag/rotate plugin for Snap.svg</title>
+        <style>
+            html, body { margin:0; padding:0; width: 100%;
+                /*height: 100%;
+                overflow: hidden;*/
+                height: 2000px;
+            }
+            .container {
+                position: absolute;
+                top: 15px;
+                left: 15px;
+                bottom: 80px;
+                right: 15px;
+                z-index: 0;
+                height: 2000px;
+                background: #e6e6e6;
+            }
+            .buttons {
+                position: absolute;
+                bottom: 20px;
+                height: 40px;
+                left: 15px;
+                right: 15px;
+            }
+            svg {
+                position: relative;
+                width: 50%;
+                height: 50%;
+                float: left;
+            }
+            #zpd {
+                background: #cccccc;
+            }
+            #zpd2 {
+                background: #dddddd;
+            }
+            #zpd3 {
+                background: #dddddd;
+            }
+            #zpd4 {
+                background: #cccccc;
+            }
+            .dragText {
+                font-size: 100px;
+            }
+            .button {
+                position: fixed;
+                right: 50px;
+                bottom: 50px;
+                z-index: 100;
+            }
+            .line {
+                position: absolute;
+                width: 2px;
+                left: 493px;
+                height: 400px;
+                background: blue;
+                z-index: 2;
+                display: block;
+            }
+        </style>
+
+        <script src="./lib/snap.svg.js"></script>
+        <script src="./snap.svg.zpd.beta.js"></script>
+    </head>
+    <body>
+
+        <div class="container">
+
+            <svg id="zpd" >
+                <defs>
+                    <linearGradient id="Gradient01">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient01)"  />
+            </svg>
+
+            <svg id="zpd2" viewBox="0 0 200 400">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
+            <svg id="zpd3">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
+            <svg id="zpd4" viewBox="0 0 200 400">
+                <defs>
+                    <linearGradient id="Gradient02">
+                      <stop offset="20%" stop-color="#39F" />
+                      <stop offset="90%" stop-color="#F3F" />
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="100" height="20"
+                        fill="url(#Gradient02)"  />
+            </svg>
+        </div>
+
+        <div class="buttons">
+            <button onclick="removeZpdHandlers()">remove zpd handlers</button>
+        </div>
+
+        <script>
+
+            var paper = Snap('#zpd');
+            var paper2 = Snap('#zpd2');
+            var paper3 = Snap('#zpd3');
+            var paper4 = Snap('#zpd4');
+
+            /*
+                Snap.load('http://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg', function (data) {
+                    var s = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    s.appendChild(data.node);
+                    paper.append(s);
+                    paper.zpd();
+                });
+            */
+
+            var applyZpd = function() {
+                paper.initZpd();
+                paper2.initZpd();
+                paper3.initZpd();
+                paper4.initZpd();
+
+                paper3.zpd.element.node.setAttribute('transform', 'scale(0.5)');
+                paper4.zpd.element.node.setAttribute('transform', 'scale(0.5)');
+
+            };
+
+            // run initializer
+            applyZpd();
+
+            var removeZpdHandlers = function () {
+                paper.destroyZpd();
+                paper2.destroyZpd();
+                paper3.destroyZpd();
+                paper4.destroyZpd();
+            }
+
+        </script>
+    </body>
+
+</html>
