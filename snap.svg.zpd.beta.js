@@ -103,6 +103,7 @@
 
 	// get an svg transformation matrix as string representation
 	var _getSvgMatrixAsString = function _getMatrixAsString (matrix) {
+		// create a simple matrix string from our svgMatrix
 		return 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
 	};
 
