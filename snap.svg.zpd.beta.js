@@ -87,19 +87,18 @@
 	};
 
 	// check if current zoom value is in specified range
-	var _inAllowedZoomRange = function _inAllowedZoomRange (zoomCurrent, zoomTotalBefore, options) {
-		var zoomTotalNow = zoomCurrent * zoomTotalBefore;
+	var _outsideAllowedZoomRange = function _outsideAllowedZoomRange (zoom, options) {
 		if (options.hasOwnProperty('zoomMinimum')) {
-			if (zoomTotalNow < options.zoomMinimum) {
-				return 0;
+			if (zoom < options.zoomMinimum) {
+				return true;
 			}
 		}
 		if (options.hasOwnProperty('zoomMaximum')) {
-			if (zoomTotalNow > options.zoomMaximum) {
-				return 0;
+			if (zoom > options.zoomMaximum) {
+				return true;
 			}
 		}
-		return zoomCurrent;
+		return false;
 	};
 
 	// get an svg transformation matrix as string representation
@@ -137,14 +136,13 @@
 		// calculate current scaling value (from delta between two-mouse-wheel events)
 		var zoomCurrent = Math.pow(1 + paper.zpd.options.zoomScale, delta);
 
-		// TODO: zoom threshold is not yet as smooth as it should be
-		zoomCurrent = _inAllowedZoomRange(zoomCurrent, paper.zpd.internal.zoom , paper.zpd.options);
-
-		// calculate total zooming value
+		// calculate current absolute zooming
 		var zoomTotal = paper.zpd.internal.zoom * zoomCurrent;
 
+		// TODO: zoom threshold is not yet as smooth as it should be
+
 		// restrict zooming to a certain limit
-		if (zoomTotal) {
+		if (_outsideAllowedZoomRange(zoomTotal, paper.zpd.options) === false) {
 
 			// save sum of delta for next mouse wheel event
 			paper.zpd.internal.delta = deltaTotal;
