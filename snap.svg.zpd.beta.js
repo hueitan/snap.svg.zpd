@@ -52,6 +52,18 @@
 		node.parentElement.removeChild(node);
 	};
 
+	// parse +1, -1 or just 1 and create integer from it
+	var _increaseDecreaseOrNumber = function increaseDecreaseOrNumber(defaultValue, input) {
+		if (input === undefined) {
+			return parseInt(defaultValue, 10);
+		} else if (input[0] === '+') {
+			return defaultValue + parseInt(input.split('+')[1], 10);
+		} else if (input[0] === '-') {
+			return defaultValue - parseInt(input.split('-')[1], 10);
+		} else {
+			return parseInt(input, 10);
+		}
+	};
 	var _handlePaperDragStart = function _handlePaperDragStart() {
 		// retrieve the transformation matrix of the zpd-element relative to the paper (svg) element
 		this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
@@ -363,17 +375,33 @@
 				var deltaZoom = value / currentZoom;
 
 				if (value !== currentZoom) {
-					// calculate new translation
-					currentTransformMatrix.e = originX - ((deltaX * deltaZoom - deltaX));
-					currentTransformMatrix.f = originY - ((deltaY * deltaZoom - deltaY));
-					// add new scaling
-					currentTransformMatrix.a = value;
-					currentTransformMatrix.d = value;
-					// apply transformation to our element
-					zpdGroup.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
-				}
+		Paper.prototype.panTo = function panTo (x, y, interval, ease, callbackFunction) {
+			if (this.hasOwnProperty, 'zpd') {
+				var paper = this;
 
-			}, interval, ease, callbackFunction);
+				// get the current transformation matrix of our element
+				var currentTransformMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
+
+				// get the origin transformation
+				var originX = currentTransformMatrix.e;
+				var originY = currentTransformMatrix.f;
+
+				// get the new position
+				var newX = _increaseDecreaseOrNumber(originX, x);
+				var newY = _increaseDecreaseOrNumber(originY, y);
+
+				// calculate difference between old and new position
+				var differenceX = newX - originX;
+				var differenceY = newY - originY;
+
+					// calculate new translation
+					currentTransformMatrix.e = originX + (value * differenceX);
+					currentTransformMatrix.f = originY + (value * differenceY);
+
+					// apply transformation to our element
+					paper.zpd.element.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
+				}, interval || 10, ease, callbackFunction);
+			}
 		};
 
 		// rotate the zpd element around it's current center
