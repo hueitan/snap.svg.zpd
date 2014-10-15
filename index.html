@@ -84,7 +84,7 @@
                         fill="url(#Gradient01)"  />
             </svg>
 
-            <svg id="zpd2" viewBox="0 0 200 400">
+            <svg id="zpd2" viewBox="0 0 200 200">
                 <defs>
                     <linearGradient id="Gradient02">
                       <stop offset="20%" stop-color="#39F" />
@@ -121,6 +121,8 @@
 
         <div class="buttons">
             <button onclick="removeZpdHandlers()">remove zpd handlers</button>
+            <button onclick="zoomTo(3)">zoom first svg to 3x</button>
+            <button onclick="zoomTo2(0.5)">zoom second svg to 0.5x</button>
         </div>
 
         <script>
@@ -158,6 +160,14 @@
                 paper2.destroyZpd();
                 paper3.destroyZpd();
                 paper4.destroyZpd();
+            };
+
+            var zoomTo = function (amount) {
+                paper.zoomTo(amount, 500);
+            };
+
+            var zoomTo2 = function (amount) {
+                paper2.zoomTo(amount, 50);
             };
 
         </script>
