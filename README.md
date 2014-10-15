@@ -147,6 +147,29 @@ create an element and add
 canvas.add(element);
 ```
 
+#### understanding the matrix
+Basic concepts of [matrix](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform)
+
+to get the current matrix
+```js
+paper.zpd('save');
+
+return
+
+SVGMatrix {
+    a: zoom,
+    b: 0,
+    c: 0,
+    d: zoom,
+    e: offset X,
+    f: offset Y
+}
+```
+if you need to map one point, for example event.click (x, y)
+```js
+matrix X = (original X + offsetX) / zoom
+matrix Y = (original Y + offsetY) / zoom
+```
 
 ### Contributor List
 
