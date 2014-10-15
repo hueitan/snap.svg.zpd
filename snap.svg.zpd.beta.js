@@ -52,6 +52,29 @@
 		node.parentElement.removeChild(node);
 	};
 
+	// --- UTILITY FUNCTIONS ---
+
+	// check if current zoom value is in specified range
+	var _outsideAllowedZoomRange = function _outsideAllowedZoomRange (zoom, options) {
+		if (options.hasOwnProperty('zoomMinimum')) {
+			if (zoom < options.zoomMinimum) {
+				return true;
+			}
+		}
+		if (options.hasOwnProperty('zoomMaximum')) {
+			if (zoom > options.zoomMaximum) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	// get an svg transformation matrix as string representation
+	var _getSvgMatrixAsString = function _getMatrixAsString (matrix) {
+		// create a simple matrix string from our svgMatrix
+		return 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
+	};
+
 	// parse +1, -1 or just 1 and create integer from it
 	var _increaseDecreaseOrNumber = function increaseDecreaseOrNumber(defaultValue, input) {
 		if (input === undefined) {
@@ -64,6 +87,9 @@
 			return parseInt(input, 10);
 		}
 	};
+
+	// --- EVENT HANDLERS ---
+
 	var _handlePaperDragStart = function _handlePaperDragStart() {
 		// retrieve the transformation matrix of the zpd-element relative to the paper (svg) element
 		this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
@@ -96,27 +122,6 @@
 
 		// apply the new matrix to the zpd element
 		paper.applyZpdTransformation(newZpdTranslationMatrix);
-	};
-
-	// check if current zoom value is in specified range
-	var _outsideAllowedZoomRange = function _outsideAllowedZoomRange (zoom, options) {
-		if (options.hasOwnProperty('zoomMinimum')) {
-			if (zoom < options.zoomMinimum) {
-				return true;
-			}
-		}
-		if (options.hasOwnProperty('zoomMaximum')) {
-			if (zoom > options.zoomMaximum) {
-				return true;
-			}
-		}
-		return false;
-	};
-
-	// get an svg transformation matrix as string representation
-	var _getSvgMatrixAsString = function _getMatrixAsString (matrix) {
-		// create a simple matrix string from our svgMatrix
-		return 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
 	};
 
 	// get a mouse wheel hander function with reference to the paper object
@@ -203,7 +208,7 @@
 			event.stopPropagation();
 		}
 		if (event.preventDefault) {
-			// note: pass in eventHandler to prevent for firefox
+			// note: pass in eventHandler to prevent for firefox (not sure if this is still needed)
 			event.preventDefault(event);
 		}
 		event.cancelBubble = true;
@@ -216,6 +221,8 @@
 	// add event handlers to the paper element
 	var _addZpdPaperEventHandlers = function _addZpdPaperEventHandlers (paper) {
 		paper.drag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
+
+		// save reference to event handler for later (as we need a reference with bind to remove it correctly)
 		paper.zpd.internal.mouseWheelHandler = _handleMouseWheel.bind(paper);
 		paper.mousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
@@ -225,6 +232,8 @@
 		paper.undrag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
 		paper.unmousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
+
+	// --- MAIN PLUGIN ---
 
 	Snap.plugin( function( Snap, Element, Paper, global ) {
 
@@ -259,7 +268,6 @@
 
 		// initialize the zpd functionality on a paper lement
 		Paper.prototype.initZpd = function initZpd(callbackFunction) {
-
 			// add a zpd-data element to this paper object
 			this.zpd = {
 				internal: {
@@ -296,7 +304,29 @@
 			if (callbackFunction) {
 				callbackFunction(null, this);
 			}
+		};
 
+		Paper.prototype.disableZpd = function disableZpd (callbackFunction) {
+			if (this.hasOwnProperty('zpd')) {
+				// remove our custom eventhandlers
+				_removeZpdPaperEventHandlers(this);
+			}
+			// run callback function if provided
+			if (callbackFunction) {
+				callbackFunction(null, this);
+			}
+		};
+
+		Paper.prototype.enableZpd = function enableZpd (callbackFunction) {
+			if (this.hasOwnProperty('zpd')) {
+				// add our event handlers (call remove-function first, to avoid duplicate event handlers)
+				_removeZpdPaperEventHandlers(this);
+				_addZpdPaperEventHandlers(this);
+			}
+			// run callback function if provided
+			if (callbackFunction) {
+				callbackFunction(null, this);
+			}
 		};
 
 		// remove the zpd functionality from a paper element
@@ -335,46 +365,60 @@
 			return transformationString;
 		};
 
-		Paper.prototype.zoomTo = function zoomTo(zoom, interval, ease, callbackFunction) {
+		Paper.prototype.zoomTo = function zoomTo (zoom, interval, ease, callbackFunction) {
+			if (this.hasOwnProperty, 'zpd') {
+				// check format of arguments
+				if (zoom < 0 || typeof zoom !== 'number') {
+					console.error('zoomTo(arg) should be a number and greater than 0');
+					return;
+				}
 
-			// check format of arguments
-			if (zoom < 0 || typeof zoom !== 'number') {
-				console.error('zoomTo(arg) should be a number and greater than 0');
-				return;
+				if (typeof interval !== 'number') {
+					interval = 3000;
+				}
+
+				var paper = this;
+
+				// get our zpd-group element
+				var zpdGroup = paper.zpd.element;
+
+				// get the current transformation matrix of our element
+				var currentTransformMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
+
+				// get the coordinates of the center
+				var boundingBox = zpdGroup.getBBox();
+
+				// we are actually only interested in the distance of the center point from the sides
+				var originX = currentTransformMatrix.e;
+				var originY = currentTransformMatrix.f;
+
+				var deltaX = parseFloat(boundingBox.width) / 2.0;
+				var deltaY = parseFloat(boundingBox.height) / 2.0;
+
+				// get the current zoom level of our transform matrix
+				var currentZoom = currentTransformMatrix.a;
+
+				// apply our zoom as animation
+				Snap.animate(currentZoom, zoom, function (value) {
+
+					// calculate difference of zooming value to initial zoom
+					var deltaZoom = value / currentZoom;
+
+					if (value !== currentZoom) {
+						// calculate new translation
+						currentTransformMatrix.e = originX - ((deltaX * deltaZoom - deltaX));
+						currentTransformMatrix.f = originY - ((deltaY * deltaZoom - deltaY));
+						// add new scaling
+						currentTransformMatrix.a = value;
+						currentTransformMatrix.d = value;
+						// apply transformation to our element
+						zpdGroup.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
+					}
+
+				}, interval, ease, callbackFunction);
 			}
+		};
 
-			if (typeof interval !== 'number') {
-				interval = 3000;
-			}
-
-			var paper = this;
-
-			// get our zpd-group element
-			var zpdGroup = paper.zpd.element;
-
-			// get the current transformation matrix of our element
-			var currentTransformMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
-
-			// get the coordinates of the center
-			var boundingBox = zpdGroup.getBBox();
-
-			// we are actually only interested in the distance of the center point from the sides
-			var originX = currentTransformMatrix.e;
-			var originY = currentTransformMatrix.f;
-
-			var deltaX = parseFloat(boundingBox.width) / 2.0;
-			var deltaY = parseFloat(boundingBox.height) / 2.0;
-
-			// get the current zoom level of our transform matrix
-			var currentZoom = currentTransformMatrix.a;
-
-			// apply our zoom
-			Snap.animate(currentZoom, zoom, function (value) {
-
-				// calculate difference of zooming value to initial zoom
-				var deltaZoom = value / currentZoom;
-
-				if (value !== currentZoom) {
 		Paper.prototype.panTo = function panTo (x, y, interval, ease, callbackFunction) {
 			if (this.hasOwnProperty, 'zpd') {
 				var paper = this;
@@ -394,6 +438,8 @@
 				var differenceX = newX - originX;
 				var differenceY = newY - originY;
 
+				// animate
+				Snap.animate(0, 1, function (value) {
 					// calculate new translation
 					currentTransformMatrix.e = originX + (value * differenceX);
 					currentTransformMatrix.f = originY + (value * differenceY);
