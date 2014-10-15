@@ -224,7 +224,6 @@
 					this.node.addEventListener('mousewheel', handler, false);
 					// Firefox
 					if (document.onwheel !== undefined){
-						console.log('add onwheel handler');
 						this.node.onwheel = handler;
 					} else {
 						this.node.addEventListener('DOMMouseScroll', handler, false);
