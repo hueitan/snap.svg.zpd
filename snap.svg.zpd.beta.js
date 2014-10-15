@@ -246,7 +246,7 @@
 		}
 
 		// initialize the zpd functionality on a paper lement
-		Paper.prototype.initZpd = function initZpd() {
+		Paper.prototype.initZpd = function initZpd(callbackFunction) {
 
 			// add a zpd-data element to this paper object
 			this.zpd = {
@@ -280,10 +280,15 @@
 			this.zpd.internal.paperMatrix = this.node.getCTM();
 			this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
 
+			// run callback function if provided
+			if (callbackFunction) {
+				callbackFunction(null, this);
+			}
+
 		};
 
 		// remove the zpd functionality from a paper element
-		Paper.prototype.destroyZpd = function destroyZpd() {
+		Paper.prototype.destroyZpd = function destroyZpd (callbackFunction) {
 			// check if zpd group has been initialized on the paper element
 			if (this.hasOwnProperty('zpd')) {
 				// remove our custom eventhandlers
@@ -291,10 +296,15 @@
 				// remove encapsulating transformation group
 				_removeNodeKeepContent(this.zpd.element.node);
 			}
+
+			// run callback function if provided
+			if (callbackFunction) {
+				callbackFunction(null, this);
+			}
 		};
 
 		// create a string for our transformation (note: order matters)
-		Paper.prototype.applyZpdTransformation = function applyZpdTransformation(transformMatrix) {
+		Paper.prototype.applyZpdTransformation = function applyZpdTransformation (transformMatrix, callbackFunction) {
 			// initialize our transformation string
 			var transformationString = '';
 
@@ -303,6 +313,11 @@
 
 			// apply the transformation
 			this.zpd.element.node.setAttribute('transform', transformationString);
+
+			// run callback function if provided
+			if (callbackFunction) {
+				callbackFunction(null, this);
+			}
 
 			// return the transformation string (if anyone would need it)
 			return transformationString;
