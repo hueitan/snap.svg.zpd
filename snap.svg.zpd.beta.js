@@ -323,10 +323,63 @@
 			return transformationString;
 		};
 
+		Paper.prototype.zoomTo = function zoomTo(zoom, interval, ease, callbackFunction) {
+
+			// check format of arguments
+			if (zoom < 0 || typeof zoom !== 'number') {
+				console.error('zoomTo(arg) should be a number and greater than 0');
+				return;
+			}
+
+			if (typeof interval !== 'number') {
+				interval = 3000;
+			}
+
+			var paper = this;
+
+			// get our zpd-group element
+			var zpdGroup = paper.zpd.element;
+
+			// get the current transformation matrix of our element
+			var currentTransformMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
+
+			// get the coordinates of the center
+			var boundingBox = zpdGroup.getBBox();
+
+			// we are actually only interested in the distance of the center point from the sides
+			var originX = currentTransformMatrix.e;
+			var originY = currentTransformMatrix.f;
+
+			var deltaX = parseFloat(boundingBox.width) / 2.0;
+			var deltaY = parseFloat(boundingBox.height) / 2.0;
+
+			// get the current zoom level of our transform matrix
+			var currentZoom = currentTransformMatrix.a;
+
+			// apply our zoom
+			Snap.animate(currentZoom, zoom, function (value) {
+
+				// calculate difference of zooming value to initial zoom
+				var deltaZoom = value / currentZoom;
+
+				if (value !== currentZoom) {
+					// calculate new translation
+					currentTransformMatrix.e = originX - ((deltaX * deltaZoom - deltaX));
+					currentTransformMatrix.f = originY - ((deltaY * deltaZoom - deltaY));
+					// add new scaling
+					currentTransformMatrix.a = value;
+					currentTransformMatrix.d = value;
+					// apply transformation to our element
+					zpdGroup.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
+				}
+
+			}, interval, ease, callbackFunction);
+		};
+
 		// rotate the zpd element around it's current center
 		Paper.prototype.rotate = function rotate(amount) {
 			// TODO: this is still gonna need some work
-			_getCurrentZpdGroupPosition(this);
+			// _getCurrentZpdGroupPosition(this);
 			this.zpd.transformation.rotation += amount;
 			this.applyZpdTransformation();
 		};
