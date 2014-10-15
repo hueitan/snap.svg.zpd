@@ -58,7 +58,7 @@
 		// get the local paper transformation matrix (from view-port and view-box settings)
 		// note: svg.node.getCTM() will return null in firefox -> we can use this.node.getScreenCTM() for dragging
 		//       as we only require the scale-change resulting from view-port, view-box settings
-		this.zpd.internal.paperMatrix = this.node.getCTM() || this.node.getScreenCTM();
+		this.zpd.internal.paperMatrix = this.node.getCTM() || this.node.getScreenCTM();
 	};
 
 	var _handlePaperDragEnd = function _handlePaperDragEnd () {
