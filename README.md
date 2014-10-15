@@ -136,6 +136,18 @@ paper.panTo(a, x, y, mina.bounce, function (err, paper) {
 ```
     a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)
     
+### Experimental: Edit
+to add an element to the transformation matrix.
+select the group that contains the matrix
+```js
+canvas = Snap.select('#snapsvg-zpd-'+paper.id);
+```
+create an element and add
+```js
+canvas.add(element);
+```
+
+
 ### Contributor List
 
 [Huei Tan](https://github.com/huei90) <br/>
