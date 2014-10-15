@@ -108,7 +108,7 @@
 	};
 
 	// get a mouse wheel hander function with reference to the paper object
-	var _handleMouseWheel = function _handleMouseWheel(event) {
+	var _handleMouseWheel = function _handleMouseWheel (event) {
 
 		// get paper element from current element (attached by .bind to the event handler)
 		var paper = this;
@@ -202,14 +202,14 @@
 	};
 
 	// add event handlers to the paper element
-	var _addZpdPaperEventHandlers = function _addZpdPaperEventHandlers(paper) {
+	var _addZpdPaperEventHandlers = function _addZpdPaperEventHandlers (paper) {
 		paper.drag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
 		paper.zpd.internal.mouseWheelHandler = _handleMouseWheel.bind(paper);
 		paper.mousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
 
 	// remove event handlers from the paper element
-	var _removeZpdPaperEventHandlers = function _removeZpdPaperEventHandlers(paper) {
+	var _removeZpdPaperEventHandlers = function _removeZpdPaperEventHandlers (paper) {
 		paper.undrag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
 		paper.unmousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
