@@ -1,5 +1,6 @@
 // create separate function scope to encapsulate our plugin
 (function() {
+	'use strict';
 
 	// define global plugin options
 	var _options = {
