@@ -462,10 +462,31 @@
 
 		// rotate the zpd element around it's current center
 		Paper.prototype.rotate = function rotate(amount) {
-			// TODO: this is still gonna need some work
-			// _getCurrentZpdGroupPosition(this);
-			this.zpd.transformation.rotation += amount;
-			this.applyZpdTransformation();
+			if (this.hasOwnProperty, 'zpd') {
+				var paper = this;
+
+				// get the current transformation matrix of our element
+				var currentTransformMatrix = paper.zpd.element.node.getTransformToElement(paper.node);
+
+				// get current size of the element
+				var boundingBox = paper.zpd.element.getBBox();
+
+				// init a new svg point
+				var p = paper.zpd.point;
+
+				// get point coordinates in zpd-group space (cx is x-direction from paper-x-origin)
+				p.x = boundingBox.cx;
+				p.y = boundingBox.cy;
+
+				// remove all translations applied through zpd-group (to get original center)
+				p = p.matrixTransform(currentTransformMatrix.inverse());
+
+				// apply the transformation to rotate the element around its center
+				currentTransformMatrix = currentTransformMatrix.translate(p.x, p.y).rotate(amount).translate(-p.x, -p.y);
+
+				// apply the new transformation matrix to the zpd-group
+				paper.zpd.element.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix) );
+			}
 		};
 
 	});
