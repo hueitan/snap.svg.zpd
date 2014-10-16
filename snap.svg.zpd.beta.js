@@ -497,6 +497,23 @@
 				return null;
 			}
 		};
+
+		// --- ADDITIONAL FUNCTIONS TO IMPLEMENT ---
+		Paper.prototype.rotateTo = function rotateTo(amount) {
+			console.log('not yet implemented');
+
+			// we might also implement rotate similar to panTo
+			// i.e. '+10' will rotate plus 10 degrees whereas 10 will rotate to 10 degrees
+		};
+
+		Paper.prototype.enableElementDragging = function enableElementDragging() {
+
+		};
+
+		Paper.prototype.disableElementDragging = function disableElementDragging(){
+
+		};
+
 	});
 
 }());
