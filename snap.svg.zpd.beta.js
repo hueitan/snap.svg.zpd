@@ -374,6 +374,7 @@
 		};
 
 		// zoom element to a certain factor (zoom from center)
+		// TODO: there is an issue with zoomTo if the element is rotated (we need to preserve the rotation)
 		Paper.prototype.zoomTo = function zoomTo (zoom, interval, ease, callbackFunction) {
 			if (this.hasOwnProperty, 'zpd') {
 				// check format of arguments
