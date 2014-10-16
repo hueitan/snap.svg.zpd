@@ -125,6 +125,7 @@
             <button onclick="zoomTo2(0.5)">zoom second svg to 0.5x</button>
             <button onclick="panTo('+30','+20')">move first svg 30 right and 20 down</button>
             <button onclick="panTo2('+30','+20')">move second svg 30 right and 20 down</button>
+            <button onclick="rotate(30)">rotate first svg by 30°</button>
         </div>
 
         <script>
@@ -178,6 +179,10 @@
 
             var panTo2 = function (x, y) {
                 paper2.panTo(x, y, 200);
+            }
+
+            var rotate = function (degree) {
+                paper.rotate(degree);
             }
 
         </script>
