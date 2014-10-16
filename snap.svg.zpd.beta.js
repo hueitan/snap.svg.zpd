@@ -489,6 +489,14 @@
 			}
 		};
 
+		Paper.prototype.saveZpd = function saveZpd() {
+			// save all zpd informations, i.e. return the current transform matrix
+			if (this.hasOwnProperty('zpd')){
+				return this.zpd.element.node.getTransformToElement(this.node);
+			} else {
+				return null;
+			}
+		};
 	});
 
 }());
