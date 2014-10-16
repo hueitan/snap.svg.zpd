@@ -268,37 +268,45 @@
 
 		// initialize the zpd functionality on a paper lement
 		Paper.prototype.initZpd = function initZpd(callbackFunction) {
-			// add a zpd-data element to this paper object
-			this.zpd = {
-				internal: {
-					delta: 0,
-					zoom: 1,
-					baseMatrix: null,
-					paperMatrix: null,
-					zpdMatrix: null,
-					mouseWheelHandler: null
-				},
-				options: {
-					zoomScale: 1,
-					zoomMaximum: 2,
-					zoomMinimum: 0.5
-				}
-			};
+			// check if zpd was already initialized on this object
+			if (this.hasOwnProperty('zpd') === false) {
 
-			// move all elements into one group node
-			_initializeZpdGroup(this);
+				// add a zpd-data element to this paper object
+				this.zpd = {
+					internal: {
+						delta: 0,
+						zoom: 1,
+						baseMatrix: null,
+						paperMatrix: null,
+						zpdMatrix: null,
+						mouseWheelHandler: null
+					},
+					options: {
+						zoomScale: 1,
+						zoomMaximum: 2,
+						zoomMinimum: 0.5
+					}
+				};
 
-			// add some event handlers to the paper element
-			// note: unfortunately event handlers will not fire on empty space in a group element
-			// therefore we attach the handlers directly to the paper element
-			_addZpdPaperEventHandlers(this);
+				// move all elements into one group node
+				_initializeZpdGroup(this);
 
-			// add a base matrix and a base transform for later use
-			this.zpd.internal.baseMatrix = this.node.createSVGMatrix();
+				// add some event handlers to the paper element
+				// note: unfortunately event handlers will not fire on empty space in a group element
+				// therefore we attach the handlers directly to the paper element
+				_addZpdPaperEventHandlers(this);
 
-			// get the svg transformation matrix and the zoom multiplier for it
-			this.zpd.internal.paperMatrix = this.node.getCTM();
-			this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
+				// add a base matrix and a base transform for later use
+				this.zpd.internal.baseMatrix = this.node.createSVGMatrix();
+
+				// get the svg transformation matrix and the zoom multiplier for it
+				this.zpd.internal.paperMatrix = this.node.getCTM();
+				this.zpd.internal.zpdMatrix = this.zpd.element.node.getTransformToElement(this.node);
+
+			} else {
+				// just re-enable the zpd function
+				this.enableZpd();
+			}
 
 			// run callback function if provided
 			if (callbackFunction) {
