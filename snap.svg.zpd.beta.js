@@ -125,7 +125,7 @@
 	};
 
 	// get a mouse wheel hander function with reference to the paper object
-	var _handleMouseWheel = function _handleMouseWheel (event) {
+	var _handlePaperMouseWheel = function _handlePaperMouseWheel (event) {
 
 		// get paper element from current element (attached by .bind to the event handler)
 		var paper = this;
@@ -223,7 +223,7 @@
 		paper.drag(_handlePaperDragMove, _handlePaperDragStart, _handlePaperDragEnd);
 
 		// save reference to event handler for later (as we need a reference with bind to remove it correctly)
-		paper.zpd.internal.mouseWheelHandler = _handleMouseWheel.bind(paper);
+		paper.zpd.internal.mouseWheelHandler = _handlePaperMouseWheel.bind(paper);
 		paper.mousewheel(paper.zpd.internal.mouseWheelHandler);
 	};
 
