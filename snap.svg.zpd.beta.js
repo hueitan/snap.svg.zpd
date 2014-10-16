@@ -365,6 +365,7 @@
 			return transformationString;
 		};
 
+		// zoom element to a certain factor (zoom from center)
 		Paper.prototype.zoomTo = function zoomTo (zoom, interval, ease, callbackFunction) {
 			if (this.hasOwnProperty, 'zpd') {
 				// check format of arguments
@@ -419,6 +420,7 @@
 			}
 		};
 
+		// move element to a certain position (use '+1', '-1', to increase or decrease position)
 		Paper.prototype.panTo = function panTo (x, y, interval, ease, callbackFunction) {
 			if (this.hasOwnProperty, 'zpd') {
 				var paper = this;
