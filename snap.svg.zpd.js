@@ -399,10 +399,10 @@
                 svgElement.addEventListener('mousedown', handlerFunctions.mouseDown, false);
                 svgElement.addEventListener('mousemove', handlerFunctions.mouseMove, false);
 
-                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
+                    navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
                     svgElement.addEventListener('mousewheel', handlerFunctions.mouseWheel, false); // Chrome/Safari
                 }
-
                 else {
                     svgElement.addEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false); // Others
                 }
@@ -419,7 +419,8 @@
             svgElement.removeEventListener('mousedown', handlerFunctions.mouseDown, false);
             svgElement.removeEventListener('mousemove', handlerFunctions.mouseMove, false);
 
-            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
+                navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
                 svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
             }
             else {
