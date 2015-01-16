@@ -266,6 +266,27 @@
 
             };
 
+
+            var dragElement = function (targetElement, g) {
+                //drag mode
+                 zpdElement.data.state = 'drag';
+
+                zpdElement.data.stateTarget = targetElement;
+
+                zpdElement.data.stateTf = g.getCTM().inverse();
+
+                zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+            };
+
+            var panIt = function (g) {
+                // Pan mode
+                zpdElement.data.state = 'pan';
+
+                zpdElement.data.stateTf = g.getCTM().inverse();
+
+                zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+            }
+
             var handleMouseDown = function handleMouseDown (event) {
 
                 if (event.preventDefault) {
@@ -276,28 +297,28 @@
 
                 var g = zpdElement.element.node;
 
-                if (
-                    event.target.tagName == "svg" || !zpdElement.options.drag // Pan anyway when drag is disabled and the user clicked on an element
-                ) {
+                if (event.target.tagName == "svg" || !zpdElement.options.drag) // Pan anyway when drag is disabled and the user clicked on an element
+                {
                     // Pan mode
-                    zpdElement.data.state = 'pan';
-
-                    zpdElement.data.stateTf = g.getCTM().inverse();
-
-                    zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+                    panIt(g);
 
                 } else {
 
                     // Drag mode
-                    zpdElement.data.state = 'drag';
-
-                    zpdElement.data.stateTarget = event.target;
-
-                    zpdElement.data.stateTf = g.getCTM().inverse();
-
-                    zpdElement.data.stateOrigin = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
-
+                    if (zpdElement.options.dragItems) {
+                        if(zpdElement.options.dragItems[event.target.snap] != null) { //only enable drag on a subset of items
+                            dragElement(event.target, g);
+                            
+                        } else { //no match so we want to pan instead of drag
+                            // Pan mode
+                            panIt(g);
+                        }
+                        
+                    } else { //make everything draggable
+                        dragElement(event.target, g);
+                    }
                 }
+
             };
 
             var handleMouseMove = function handleMouseMove (event) {
@@ -399,10 +420,10 @@
                 svgElement.addEventListener('mousedown', handlerFunctions.mouseDown, false);
                 svgElement.addEventListener('mousemove', handlerFunctions.mouseMove, false);
 
-                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
+                    navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
                     svgElement.addEventListener('mousewheel', handlerFunctions.mouseWheel, false); // Chrome/Safari
                 }
-
                 else {
                     svgElement.addEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false); // Others
                 }
@@ -419,7 +440,8 @@
             svgElement.removeEventListener('mousedown', handlerFunctions.mouseDown, false);
             svgElement.removeEventListener('mousemove', handlerFunctions.mouseMove, false);
 
-            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0) {
+            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
+                navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
                 svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
             }
             else {
@@ -439,7 +461,8 @@
                 zoom: true,         // enable or disable zooming (default enabled)
                 drag: false,        // enable or disable dragging (default disabled)
                 zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                zoomThreshold: null, // define zoom threshold,
+                dragItems : null     // add snap id's of elements you want to drag - (property is ignored if drag = false)
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin
@@ -450,7 +473,8 @@
                     destroy: 'destroy',
                     save: 'save',
                     origin: 'origin',
-                    callback: 'callback'
+                    callback: 'callback',
+                    domElement: 'domElement'
                 };
 
             var zpdElement = null;
@@ -503,7 +527,6 @@
                 case situationState.init:
                 case situationState.reinit:
                 case situationState.callback:
-
                     // callback
                     if (callbackFunc) {
                         callbackFunc(null, zpdElement);
@@ -553,6 +576,8 @@
                     }
 
                     return;
+                case situationState.domElement:
+                    return document.getElementById(snapsvgzpd.uniqueIdPrefix + self.id);
             }
         };
 
@@ -664,4 +689,3 @@
     });
 
 })(Snap);
-
