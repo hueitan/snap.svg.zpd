@@ -122,11 +122,12 @@ paper.zpd('origin');
     back to the origin location
 
 #### paper.zpd('domElement')
-    get the dom Element of zpd to make it easy to add new elements inside the zpd <g> node
 
 ```js
 paper.zpd('domElement').appendChild(paper.circle(10,10,10).node);    
 ```
+
+    get the dom Element of zpd to make it easy to add new elements inside the zpd <g> node
 
 #### zoomTo
 
