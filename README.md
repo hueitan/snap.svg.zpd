@@ -69,6 +69,22 @@ paper.zpd(function (err, paper) {
 
     array: min and max zoom level threshold [min, max] (default null)
 
+#### dragItems
+
+    object: object of snap element ids.  keys are id's of the object
+
+```js
+    var c1 = paper.circle(100,  100, 3);
+    var c2 = paper.circle(200,  100, 3);
+    var c2 = paper.circle(300,  100, 3);
+    var myDragItems = {};
+    myDragItems[c1.id] = c1.id;
+    myDragItems[c2.id] = c2.id;
+    myDragItems[c3.id] = c3.id;
+
+    paper.zpd({drag:true, dragItems: myDragItems});
+```    
+
 ### More
 
 #### paper.zpd('destroy')
@@ -104,6 +120,13 @@ paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783
 paper.zpd('origin');
 ```
     back to the origin location
+
+#### paper.zpd('domElement')
+    get the dom Element of zpd to make it easy to add new elements inside the zpd <g> node
+
+```js
+paper.zpd('domElement').appendChild(paper.circle(10,10,10).node);    
+```
 
 #### zoomTo
 
