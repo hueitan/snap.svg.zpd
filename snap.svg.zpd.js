@@ -554,7 +554,7 @@
 
                 case situationState.save:
 
-                    var g = document.getElementById(snapsvgzpd.uniqueIdPrefix + self.id);
+                    var g = zpdElement.element.node;;
 
                     var returnValue = g.getCTM();
 
@@ -577,7 +577,7 @@
 
                     return;
                 case situationState.domElement:
-                    return document.getElementById(snapsvgzpd.uniqueIdPrefix + self.id);
+                    return zpdElement.element.node;
             }
         };
 
