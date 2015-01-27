@@ -175,3 +175,9 @@ matrix Y = (original Y + offsetY) / zoom
 
 [Huei Tan](https://github.com/huei90) <br/>
 [Ramon Saccilotto](https://github.com/tikiatua)
+
+### Reference
+
+[svgpan](https://code.google.com/p/svgpan/) <br/>
+[raphael-zpd](https://github.com/andrewseddon/raphael-zpd) <br/>
+[svg-pan-zoom](https://github.com/ariutta/svg-pan-zoom)
