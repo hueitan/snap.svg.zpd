@@ -49,11 +49,15 @@ paper.zpd(function (err, paper) {
 
 ### options
 
-#### zoom
+#### pan
 
     true or false: enable or disable panning (default true)
+    
+#### panHandler
 
-#### pad
+    true or false: sets the background as the only element that can pan the entire zpd object
+
+#### zoom
 
     true or false: enable or disable zooming (default true)
 
