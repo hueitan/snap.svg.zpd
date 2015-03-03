@@ -51,11 +51,11 @@ paper.zpd(function (err, paper) {
 
 #### zoom
 
-    true or false: enable or disable panning (default true)
-
-#### pad
-
     true or false: enable or disable zooming (default true)
+
+#### pan
+
+    true or false: enable or disable panning (default true)
 
 #### drag
 
