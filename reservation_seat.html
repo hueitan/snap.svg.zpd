@@ -21,15 +21,52 @@
             width: 100%;
         }
 
+        .information_box {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 150px;
+            border-top: 1px solid #AAAAAA;
+            background: #DDDDDD;
+        }
         #data {
             position: fixed;
-            right: 100px;
-            top: 300px;
-            color: gray;
-            background: white;
+            right: 30px;
+            bottom: 63px;
+            color: #111111;
             z-index: 10000;
-            font-size: 30px;
+            font-size: 20px;
         }
+        #center_btn {
+            width: auto;
+            border: 1px solid #111111;
+            border-radius: 2px;
+            padding: 20px 80px;
+            bottom: 45px;
+            position: fixed;
+            left: 50px;
+        }
+        #center_btn:hover {
+            cursor: pointer;
+            background: #111111;
+            color: #ffffff;
+        }
+
+        #submit_btn {
+            width: auto;
+            border: 1px solid #111111;
+            border-radius: 2px;
+            padding: 20px 50px;
+            bottom: 45px;
+            position: fixed;
+            left: 280px;
+        }
+        #submit_btn:hover {
+            cursor: pointer;
+            background: #111111;
+            color: #ffffff;
+        }
+        /* color : http://clrs.cc/ */
     </style>
 
     <script src="./lib/snap.svg.js"></script>
@@ -37,136 +74,222 @@
 </head>
 <body>
 
-<div id="data">
+<svg id="svg"></svg>
 
+<div class="information_box">
+    <span id="center_btn" onclick="center()">
+        Center
+    </span>
+    <span id="submit_btn" onclick="submit()">
+        Submit Seat
+    </span>
+    <div id="data">
+        Status: You are allow to select 1 seat
+    </div>
 </div>
 
 <script>
-    // prototype
     (function (Snap) {
         Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
 
-            Paper.prototype.isSomeoneSelected = false;
             Paper.prototype.selectedSeat = null;
+            Paper.prototype.seatAvailableToSelect = null;
+            Paper.prototype.pickaseat = function (options, cb) {
+                var self = this;
+
+                var defaultOptions = {
+                    seatAvailableToSelect: 1,
+                    selectedSeat: [],
+                };
+
+                // variable
+                self.seatAvailableToSelect = (options.seatAvailableToSelect >= 0) ? options.seatAvailableToSelect : defaultOptions.seatAvailableToSelect;
+                self.selectedSeat = options.selectedSeat || defaultOptions.selectedSeat;
+
+                // insertSeat
+                if (options.seats) {
+                    self.insertSeat(options.seats);
+                }
+
+                // insertStage
+                if (options.stages) {
+                    self.insertStage(options.stages);
+                }
+
+                // preselect seat
+                if (self.selectedSeat.length) {
+
+                }
+
+                // initial callback
+                if (cb) {
+                    cb();
+                }
+            }
             Paper.prototype.insertSeat = function (seats) {
                 var self = this;
-                // seat is array like object with [{cx:10,cy:10},{cx:50,cy:50}]
+                // seat is array like object with [{x:10,y:10},{x:50,y:50}]
                 seats.forEach(function (seat) {
-                    if (seat.occupied) { // occupied
-                        self.circle(seat.cx, seat.cy, 20)
-                                .attr({stroke: 'gray', fill: 'gray'})
-                                .addClass('seat')
-                    } else {
-                        //self.attr({fill: 'white'})
-
-                     self.circle(seat.cx, seat.cy, 20)
-                            .attr({stroke: 'gray', fill: 'white'})
-                            .addClass('seat')
+                     var text = self.text(seat.x-9, seat.y+5, seat.name);
+                     var circle = self.circle(seat.x, seat.y, 15)
+                            .attr({stroke: '#0074D9', fill: '#0074D9', fillOpacity: 0})
                             .click(function () {
                                 self.selectSeat(this, seat);
                             })
                             .hover(function () {
-                                this.node.style.cursor = 'pointer';
-                                if (!self.isSomeoneSelected) {
-                                    this.attr({fill: 'red'});
-                                } else if (self.selectedSeat != this) {
-                                    this.attr({fill: 'red'});
-                                }
+                                self.hoverSeat(this, seat);
                             }, function () {
-                                if (!self.isSomeoneSelected) {
-                                    this.attr({fill: 'white'});
-                                } else if (self.selectedSeat != this) {
-                                    this.attr({fill: 'white'});
-                                }
-                            })
-                            .drag(function (dx, dy, posx, posy) {
-                                // this.attr({ cx: posx, cy: posy }); // basic drag, you would want to adjust to take care of where you grab etc.
-                            },
-                            function () {
-                                console.log("Move started");
-                            },
-                            function () {
-                                console.log("Move stopped");
+                                self.unhoverSeat(this, seat);
                             });
+                    
+                    // group the seat
+                    var group = self.g(text,circle).addClass('seat');
+                    group.node.setAttribute('seat', seat.name);
+
+                    if (seat.occupied) { // occupied
+                        text.attr({fill: '#ffffff'});
+                        circle.attr({stroke: '#dddddd'});
+                        group.addClass('occupied');
                     }
                 });
             };
 
-            Paper.prototype.selectSeat = function (node, seat) {
+            Paper.prototype.hoverSeat = function (node, seat) {
                 var self = this;
-                if (self.selectedSeat == node) {
-                    self.deSelectSeat(self.selectedSeat);
-                    return;
-                }
-                if (self.selectedSeat) {
-                    self.deSelectSeat(self.selectedSeat);
+                if (seat.occupied) {
+                    return self;
                 }
 
-                self.selectedSeat = node;
-                node.attr({fill: 'blue'});
-                document.getElementById('data').textContent = 'you are select seat: ' + seat.name;
-                self.isSomeoneSelected = true;
-                // console.log('you are select seat: ' + seat.name);
+                node.node.style.cursor = 'pointer';
+                if (self.seatAvailableToSelect > 0 || self.seatAvailableToSelect <= self.totalSeatAvailableToSelect) {
+                    node.attr({fillOpacity: 1});
+                }
             };
-            Paper.prototype.deSelectSeat = function (node) {
+            Paper.prototype.unhoverSeat = function (node, seat) {
                 var self = this;
-                node.attr({fill: 'white'});
-                document.getElementById('data').textContent = '';
-                self.isSomeoneSelected = false;
-                self.selectedSeat = null;
+                if (seat.occupied) {
+                    return self;
+                }
+                if (self.selectedSeat.indexOf(seat) == -1) {
+                    node.attr({fillOpacity: 0});
+                }
+            }
+            Paper.prototype.selectSeat = function (node, seat) {
+                var self = this;
+                if (seat.occupied) {
+                    return self;
+                }
+                /*
+                 *                                             | yes: Deselect (1)
+                 *                  | yes: --isAlreadySelect-->|
+                 *                  |                          |  no: Unable to Select (2)
+                 * Select --isFull-->
+                 *                  |                          | yes: Deselect (1)
+                 *                  |  no: --isAlreadySelect-->| 
+                 *                                             |  no: Select (3)
+                 *
+                 */
+                
+                // Deselect(1)
+                if (self.selectedSeat.indexOf(seat) !== -1) {
+                    console.log('[selectSeat:]', 'deselect(1)');
+                    self.deSelectSeat(node, seat);
+                    return self;
+                }
+                // Unable to Select(2)
+                if (self.seatAvailableToSelect === 0 && self.selectedSeat.indexOf(seat) === -1) {
+                    console.log('[selectSeat:]', 'unabletoselect(2)');
+                    // callback
+                    document.getElementById('data').textContent = 'Please deselect seat to select';
+                    return self;
+                }
+                // Select(3)
+                if (self.seatAvailableToSelect > 0 && self.selectedSeat.indexOf(seat) === -1) {
+                    console.log('[selectSeat:]', 'select(3)');
+                    self.selectedSeat.push(seat);
+                    node.attr({fillOpacity: 1});
+                    self.seatAvailableToSelect--;
+
+                    // callback
+                    document.getElementById('data').textContent = '' + seat.name;
+                }                
                 // console.log('you are select seat: ' + seat.name);
             };
+            Paper.prototype.deSelectSeat = function (node, seat) {
+                var self = this;
+                node.attr({fillOpacity: 0});
+                
+                var index = self.selectedSeat.indexOf(seat);
+                if (index != -1) {
+                    self.selectedSeat.splice(index, 1);
+                }
+                self.seatAvailableToSelect++;
+                
+                // callback
+                document.getElementById('data').textContent = '';
+            };
+            
             Paper.prototype.insertStage = function () {
-                this.rect(300,100, 400,100).attr({fill:'red'});
-                this.text(450, 165, 'Stage').node.style.fontSize = '50px';
+                var rect = this.rect(420,100, 400,100).attr({stroke:'#2ECC40', fillOpacity: 0});
+                var text = this.text(570, 165, 'Stage').attr({fill: '#2ECC40'});
+                text.node.style.fontSize = '50px';
+                this.g(text, rect).addClass('stage');
+            };
+
+            Paper.prototype.submitSeat = function (cb) {
+                var self = this;
+                if (cb) {
+                    cb(self.selectedSeat);
+                    return;
+                }
+                return self.selectedSeat;
             }
         });
     })(Snap);
 </script>
 
 <script>
-    // execute program
-    var paper = Snap();
+    (function (window) {
+        var paper = Snap('#svg');
 
-    var applyZpd = function () {
-        paper.zpd({drag: false});
-    };
+        var applyZpd = function () {
+            paper.zpd({drag: false});
+        };
 
-    paper.insertStage();
-    // [{cx:10,cy:10},{cx:20,cy:20}];
-    paper.insertSeat([
-        {cx: 300, cy: 300, name: 'A1', occupied: false},{cx: 350, cy: 300, name: 'B1', occupied: true},{cx: 400, cy: 300, name: 'C1', occupied: false},{cx: 450, cy: 300, name: 'D1', occupied: true},{cx: 500, cy: 300, name: 'E1', occupied: false},{cx: 550, cy: 300, name: 'F1', occupied: false},{cx: 600, cy: 300, name: 'H1', occupied: false},{cx: 650, cy: 300, name: 'I1', occupied: false},{cx:700, cy: 300, name: 'J1', occupied: true},
-        {cx: 300, cy: 350, name: 'A2', occupied: false},{cx: 350, cy: 350, name: 'B2', occupied: false},{cx: 400, cy: 350, name: 'C2', occupied: true},{cx: 450, cy: 350, name: 'D2', occupied: false},{cx: 500, cy: 350, name: 'E2', occupied: false},{cx: 550, cy: 350, name: 'F2', occupied: false},{cx: 600, cy: 350, name: 'H2', occupied: true},{cx: 650, cy: 350, name: 'I2', occupied: false},{cx:700, cy: 350, name: 'J2', occupied: false},
-        {cx: 300, cy: 400, name: 'A3', occupied: true},{cx: 350, cy: 400, name: 'B3', occupied: false},{cx: 400, cy: 400, name: 'C3', occupied: false},{cx: 450, cy: 400, name: 'D3', occupied: false},{cx: 500, cy: 400, name: 'E3', occupied: false},{cx: 550, cy: 400, name: 'F3', occupied: false},{cx: 600, cy: 400, name: 'H3', occupied: false},{cx: 650, cy: 400, name: 'I3', occupied: true},{cx:700, cy: 400, name: 'J3', occupied: false},
-        {cx: 300, cy: 450, name: 'A4', occupied: false},{cx: 350, cy: 450, name: 'B4', occupied: false},{cx: 400, cy: 450, name: 'C4', occupied: true},{cx: 450, cy: 450, name: 'D4', occupied: false},{cx: 500, cy: 450, name: 'E4', occupied: false},{cx: 550, cy: 450, name: 'F4', occupied: false},{cx: 600, cy: 450, name: 'H4', occupied: false},{cx: 650, cy: 450, name: 'I4', occupied: false},{cx:700, cy: 450, name: 'J4', occupied: false},
-        {cx: 300, cy: 500, name: 'A5', occupied: false},{cx: 350, cy: 500, name: 'B5', occupied: true},{cx: 400, cy: 500, name: 'C5', occupied: false},{cx: 450, cy: 500, name: 'D5', occupied: false},{cx: 500, cy: 500, name: 'E5', occupied: false},{cx: 550, cy: 500, name: 'F5', occupied: false},{cx: 600, cy: 500, name: 'H5', occupied: false},{cx: 650, cy: 500, name: 'I5', occupied: false},{cx:700, cy: 500, name: 'J5', occupied: false}
-    ]);
+        window.center = function () {
+            paper.zpd('origin');
+        }
+        window.submit = function () {
+            paper.submitSeat(function (seat) {
+                var output = '';
+                for (var key in seat) {
+                    output += '[' + seat[key].name + '] ';
+                }
+                if (output) {
+                    alert('you are select seat ' + output);
+                } else {
+                    alert('please select at least one seat');
+                }
+                
+            });
+        }
 
-    applyZpd();
-    //    Snap.load('./lib/malaysia.svg', function (f) {
-    //        paper.append(f);
-    //        applyZpd();
-    //        paper.zoomTo(1.5, 100, null, function () {
-    //            paper.panTo('+200', '+200');
-    //        });
-    //
-    //        var subject = [{id:"BN"},{id:"MY-01"},{id:"MY-02"},{id:"MY-03"},{id:"MY-04"},{id:"MY-05"},{id:"MY-06"},{id:"MY-07"},{id:"MY-08"},{id:"MY-09"},{id:"MY-10"},{id:"MY-11"},{id:"MY-12"},{id:"MY-13"},{id:"MY-15"}];
-    //        for (var k in subject) {
-    //            document.getElementById(subject[k].id).onmouseover = becomeBlack;
-    //            document.getElementById(subject[k].id).onmouseout = reverseBlack;
-    //        }
-    //
-    //        // label: <text x="0" y="15" fill="red">I love SVG!</text>
-    //        var label = paper.text({
-    //            fill: 'red'
-    //        });
-    //        label.node.id = 'label';
-    //        tooltip = document.getElementById('label');
-    //        // Snap.load('./lib/navigation.svg', function (d) {
-    //        //    paper.append(d);
-    //        // });
-    //    });
+        paper.pickaseat({
+            // data should load from server database
+            seats:[
+                {x: 300, y: 250, name: 'A0', id: 'asdf', occupied: false},{x: 350, y: 250, name: 'B0', occupied: true},{x: 400, y: 250, name: 'C0', occupied: false},{x: 450, y: 250, name: 'D0', occupied: true},{x: 500, y: 250, name: 'E0', occupied: false},{x: 550, y: 250, name: 'F0', occupied: false}, {x: 700, y: 250, name: 'H0', occupied: false},{x: 750, y: 250, name: 'I0', occupied: false},{x:800, y: 250, name: 'J0', occupied: true}, {x:850, y: 250, name: 'K0', occupied: true}, {x:900, y: 250, name: 'L0', occupied: true},{x: 950, y: 250, name: 'M0', occupied: true},
+                {x: 300, y: 300, name: 'A1', id: 'asdf', occupied: false},{x: 350, y: 300, name: 'B1', occupied: true},{x: 400, y: 300, name: 'C1', occupied: false},{x: 450, y: 300, name: 'D1', occupied: true},{x: 500, y: 300, name: 'E1', occupied: false},{x: 550, y: 300, name: 'F1', occupied: false}, {x: 700, y: 300, name: 'H1', occupied: false},{x: 750, y: 300, name: 'I1', occupied: false},{x:800, y: 300, name: 'J1', occupied: true}, {x:850, y: 300, name: 'K1', occupied: true}, {x:900, y: 300, name: 'L1', occupied: true},{x: 950, y: 300, name: 'M1', occupied: true},
+                {x: 300, y: 350, name: 'A2', id: 'asdf', occupied: false},{x: 350, y: 350, name: 'B2', occupied: false},{x: 400, y: 350, name: 'C2', occupied: true},{x: 450, y: 350, name: 'D2', occupied: false},{x: 500, y: 350, name: 'E2', occupied: false},{x: 550, y: 350, name: 'F2', occupied: false},{x: 700, y: 350, name: 'H2', occupied: true}, {x: 750, y: 350, name: 'I2', occupied: false},{x:800, y: 350, name: 'J2', occupied: false},{x:850, y: 350, name: 'K2', occupied: false},{x:900, y: 350, name: 'L2', occupied: false},{x:950, y: 350, name: 'M2', occupied: false},
+                {x: 300, y: 400, name: 'A3', id: 'asdf', occupied: true}, {x: 350, y: 400, name: 'B3', occupied: false},{x: 400, y: 400, name: 'C3', occupied: false},{x: 450, y: 400, name: 'D3', occupied: false},{x: 500, y: 400, name: 'E3', occupied: false},{x: 550, y: 400, name: 'F3', occupied: false},{x: 700, y: 400, name: 'H3', occupied: false},{x: 750, y: 400, name: 'I3', occupied: true}, {x:800, y: 400, name: 'J3', occupied: false},{x:850, y: 400, name: 'K3', occupied: false},{x:900, y: 400, name: 'L3', occupied: false},{x:950, y: 400, name: 'M3', occupied: false},
+                {x: 300, y: 450, name: 'A4', id: 'asdf', occupied: false},{x: 350, y: 450, name: 'B4', occupied: false},{x: 400, y: 450, name: 'C4', occupied: true},{x: 450, y: 450, name: 'D4', occupied: false},{x: 500, y: 450, name: 'E4', occupied: false},{x: 550, y: 450, name: 'F4', occupied: false},{x: 700, y: 450, name: 'H4', occupied: false},{x: 750, y: 450, name: 'I4', occupied: false},{x:800, y: 450, name: 'J4', occupied: false},{x:850, y: 450, name: 'K4', occupied: false},{x:900, y: 450, name: 'L4', occupied: false},{x:950, y: 450, name: 'M4', occupied: false},
+                {x: 300, y: 500, name: 'A5', id: 'asdf', occupied: false},{x: 350, y: 500, name: 'B5', occupied: true},{x: 400, y: 500, name: 'C5', occupied: false},{x: 450, y: 500, name: 'D5', occupied: false},{x: 500, y: 500, name: 'E5', occupied: false},{x: 550, y: 500, name: 'F5', occupied: false},{x: 700, y: 500, name: 'H5', occupied: false},{x: 750, y: 500, name: 'I5', occupied: false},{x:800, y: 500, name: 'J5', occupied: false},{x:850, y: 500, name: 'K5', occupied: false},{x:900, y: 500, name: 'L5', occupied: false},{x:950, y: 500, name: 'M5', occupied: false},
+            ]
+        });
 
+        paper.insertStage();
+
+        applyZpd();
+    })(window);
 </script>
 </body>
 
