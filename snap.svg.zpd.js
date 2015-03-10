@@ -371,6 +371,8 @@
                 }
 
                 zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
+                
+                eve("snap.zpd.zoomed", null, zpdElement.element.node.getCTM().a);
             };
 
             return {
@@ -587,6 +589,8 @@
                         callbackFunction(null, zpdElement);
                     }
                 });
+                
+                eve("snap.zpd.zoomed", null, zoom);
             }
         };
 

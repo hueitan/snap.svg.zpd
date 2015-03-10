@@ -176,6 +176,11 @@
                applyZpd();
             };
 
+            //Events
+            eve.on("snap.zpd.zoomed", function(z) {
+                console.log('New Zoomed to:', z);
+            });
+
             // settings
             // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
             // paper.zpd(function (err, paper) { console.log(paper); });
