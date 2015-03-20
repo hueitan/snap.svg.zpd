@@ -581,8 +581,12 @@
                 // get a reference to the element
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
 
+                var boundingBox = zpdElement.getBBox();
+                var deltaX = parseFloat(boundingBox.width) / 2.0;
+                var deltaY = parseFloat(boundingBox.height) / 2.0;
+
                 // animate our element and call the callback afterwards
-                zpdElement.animate({ transform: new Snap.Matrix().scale(zoom) }, interval, ease || null, function () {
+                zpdElement.animate({ transform: new Snap.Matrix().scale(zoom, zoom, deltaX, deltaY) }, interval, ease || null, function () {
                     if (callbackFunction) {
                         callbackFunction(null, zpdElement);
                     }
