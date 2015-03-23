@@ -91,6 +91,11 @@
         };
 
         /**
+         * Global variable to store root of the svg element
+         */
+        var rootSvgObject;
+
+        /**
          * remove node parent but keep children
          */
         var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
@@ -157,6 +162,14 @@
         };
 
         /**
+         * Get an svg transformation matrix as string representation
+         */
+        var _getSvgMatrixAsString = function _getMatrixAsString (matrix) {
+
+            return 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
+        };
+
+        /**
          * add a new <g> element to the paper
          * add paper nodes into <g> element (Snapsvg Element)
          * and give the nodes an unique id like 'snapsvg-zpd-12345'
@@ -177,6 +190,9 @@
          * </svg>
          */
         var _initZpdElement = function initAndGetZpdElement (svgObject, options) {
+
+            // get root of svg object
+            rootSvgObject = svgObject.node;
 
             // get all child nodes in our svg element
             var rootChildNodes = svgObject.node.childNodes;
@@ -581,16 +597,35 @@
                 // get a reference to the element
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
 
+                var currentTransformMatrix = zpdElement.node.getTransformToElement(rootSvgObject);
+                var currentZoom = currentTransformMatrix.a;
+                var originX = currentTransformMatrix.e;
+                var originY = currentTransformMatrix.f;
+
                 var boundingBox = zpdElement.getBBox();
                 var deltaX = parseFloat(boundingBox.width) / 2.0;
                 var deltaY = parseFloat(boundingBox.height) / 2.0;
 
-                // animate our element and call the callback afterwards
-                zpdElement.animate({ transform: new Snap.Matrix().scale(zoom, zoom, deltaX, deltaY) }, interval, ease || null, function () {
-                    if (callbackFunction) {
-                        callbackFunction(null, zpdElement);
+                Snap.animate(currentZoom, zoom, function (value) {
+
+                    // calculate difference of zooming value to initial zoom
+                    var deltaZoom = value / currentZoom;
+
+                    if (value !== currentZoom) {
+
+                        // calculate new translation
+                        currentTransformMatrix.e = originX - ((deltaX * deltaZoom - deltaX));
+                        currentTransformMatrix.f = originY - ((deltaY * deltaZoom - deltaY));
+
+                        // add new scaling
+                        currentTransformMatrix.a = value;
+                        currentTransformMatrix.d = value;
+
+                        // apply transformation to our element
+                        zpdElement.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
                     }
-                });
+
+                }, interval, ease, callbackFunction);
             }
         };
 
