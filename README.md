@@ -19,8 +19,23 @@ Drop me an issue/PR for the showcase
 
     $ npm install snap.svg.zpd --save
 
-### Usage
 
+### How The Plugin Works
+
+The plugin will put all child elements in the svg into a group-element and apply the
+"global transformations" to this group - like zooming, panning or rotating the whole canvas.
+
+When dragging is enabled, the respective transformations will be applied directly to
+the element that is under the mouse-cursor.
+
+Svg manipulations after applying the plugin should take part inside of the zpd group.
+I.e. if you would like to add a new element that should inherit zooming and panning, you
+should not add it directly to the svg, but to the zpd-group within.
+
+<img src="zpd_explained.jpg">
+
+
+### Usage
 
 Include `snap.svg.zpd.js` after `snap.svg.js`
 
@@ -135,7 +150,7 @@ paper.panTo(a, x, y, mina.bounce, function (err, paper) {
 });
 ```
     a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)
-    
+
 ### Experimental: Edit
 to add an element to the transformation matrix.
 select the group that contains the matrix
