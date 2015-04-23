@@ -90,18 +90,18 @@
             dataStore: {}                       // "global" storage for all our zpd elements
         };
 
-        /**
-         * remove node parent but keep children
-         */
-        var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
-            if (!node.parentElement) {
-                return;
-            }
-            while (node.firstChild) {
-                node.parentElement.insertBefore(node.firstChild, node);
-            }
-            node.parentElement.removeChild(node);
-        };
+       /**
+		 * remove node parent but keep children
+		 */
+		var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
+		  if (!node.parentNode) {
+		    return;
+		  }
+		  while (node.firstChild) {
+		    node.parentNode.insertBefore(node.firstChild, node);
+		  }
+		  node.parentNode.removeChild(node);
+		};
 
         /**
          * Detect is +1 -1 or 1
