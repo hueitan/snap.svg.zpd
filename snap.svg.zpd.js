@@ -700,11 +700,40 @@
             }
         }
 
+        function zoomToBBox(elem) {
+        };
+
+        var zoomToElement = function(el, filling, interval, ease, cb){
+            var zpdElement = snapsvgzpd.dataStore[this.id].element,
+                rootSvg = snapsvgzpd.dataStore[this.id].data.root,
+                width = rootSvg.clientWidth,
+                height = rootSvg.clientHeight,
+                bbox = el.getBBox(),
+                x = (bbox.x + bbox.x2) / 2,
+                y = (bbox.y + bbox.y2) / 2,
+                scale = filling / Math.max(bbox.w / width, bbox.h / height),
+                translateX = width / 2 - scale * x,
+                translateY = height / 2 - scale * y,
+                m = Snap.matrix(scale, 0, 0, scale, translateX, translateY);
+            // paper.animate({ transform: m }, 400, mina.easeout);
+
+            if (interval === 0 || interval === undefined){
+                zpdElement.transform(m);
+            }else{
+                zpdElement.animate({ transform: m }, interval, ease || null, function () {
+                    if (cb) {
+                        cb(null, zpdElement);
+                    }
+                });
+            }
+        }
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
         Paper.prototype.rotate = rotate;
         Paper.prototype.toggleZpdEnabled = toggleEnabled;
+        Paper.prototype.zoomToElement = zoomToElement;
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
