@@ -151,6 +151,15 @@ paper.panTo(a, x, y, mina.bounce, function (err, paper) {
 ```
     a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)
 
+#### toggleZpdEnabled
+By default, zpd is enabled, but you can toggle or set its activation using this function.  
+
+```js
+paper.toggleZpdEnabled();  // toggle off 
+paper.toggleZpdEnabled(true); // sets to on
+paper.toggleZpdEnabled(false); // sets to off
+```
+
 ### Experimental: Edit
 to add an element to the transformation matrix.
 select the group that contains the matrix

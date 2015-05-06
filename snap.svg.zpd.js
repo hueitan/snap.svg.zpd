@@ -87,7 +87,8 @@
          */
         var snapsvgzpd = {
             uniqueIdPrefix: 'snapsvg-zpd-',     // prefix for the unique ids created for zpd
-            dataStore: {}                       // "global" storage for all our zpd elements
+            dataStore: {}    ,
+            enabled: true                   // "global" storage for all our zpd elements
         };
 
         /**
@@ -99,13 +100,13 @@
          * remove node parent but keep children
          */
         var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
-            if (!node.parentNode) {
+            if (!node.parentElement) {
                 return;
             }
             while (node.firstChild) {
-                node.parentNode.insertBefore(node.firstChild, node);
+                node.parentElement.insertBefore(node.firstChild, node);
             }
-            node.parentNode.removeChild(node);
+            node.parentElement.removeChild(node);
         };
 
         /**
@@ -266,7 +267,7 @@
         var _getHandlerFunctions = function getHandlerFunctions(zpdElement) {
 
             var handleMouseUp = function handleMouseUp (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -283,7 +284,7 @@
             };
 
             var handleMouseDown = function handleMouseDown (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -317,7 +318,7 @@
             };
 
             var handleMouseMove = function handleMouseMove (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -349,7 +350,7 @@
             };
 
             var handleMouseWheel = function handleMouseWheel (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (!zpdElement.options.zoom) {
                     return;
                 }
@@ -456,7 +457,8 @@
                 zoom: true,         // enable or disable zooming (default enabled)
                 drag: false,        // enable or disable dragging (default disabled)
                 zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                zoomThreshold: null, // define zoom threshold
+                enabled: true
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin
@@ -690,10 +692,19 @@
             }
         };
 
+        var toggleEnabled = function(isEnabled){
+            if (isEnabled !== undefined){
+                snapsvgzpd.enabled = isEnabled;
+            }else{
+                snapsvgzpd.enabled = !snapsvgzpd.enabled;
+            }
+        }
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
         Paper.prototype.rotate = rotate;
+        Paper.prototype.toggleZpdEnabled = toggleEnabled;
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
