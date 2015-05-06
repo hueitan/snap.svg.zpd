@@ -99,13 +99,13 @@
          * remove node parent but keep children
          */
         var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
-            if (!node.parentElement) {
+            if (!node.parentNode) {
                 return;
             }
             while (node.firstChild) {
-                node.parentElement.insertBefore(node.firstChild, node);
+                node.parentNode.insertBefore(node.firstChild, node);
             }
-            node.parentElement.removeChild(node);
+            node.parentNode.removeChild(node);
         };
 
         /**
