@@ -31,12 +31,16 @@
 
                 Snap.load('lib/malaysia.svg', function (data) {
                     container = document.getElementById('svg-container');
-                    svgNode = data.node.children[0]
+                    svgNode = data.node.children[0];
                     container.appendChild(svgNode);
                     paper = Snap(svgNode);
                     var bbox = paper.select('g').getBBox();
                     paper.attr({'height': bbox.h, 'width':bbox.w});
-                    paper.zpd();
+                    paper.zpd({
+                        'viewChanged':function(){
+                            console.log('view change');
+                        }
+                    });
                     // viewSelector('path[qs\\:layer="1301-Gross Building Area"]');
                     var ele = paper.selectAll('.land').forEach(function(el){
                         el.click(function(){

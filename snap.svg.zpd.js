@@ -190,6 +190,12 @@
          *     </g>
          * </svg>
          */
+
+        var _viewChanged = function(options){
+            if (options.viewChanged){
+              options.viewChanged();  
+            }
+           } 
         var _initZpdElement = function initAndGetZpdElement (svgObject, options) {
 
             // get root of svg object
@@ -280,6 +286,8 @@
                     zpdElement.data.state = '';
 
                 }
+
+                _viewChanged(zpdElement.options);
 
             };
 
@@ -388,6 +396,7 @@
                 }
 
                 zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
+                viewChanged(zpdElement.options);
             };
 
             return {
@@ -598,7 +607,8 @@
 
                 // get a reference to the element
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
-
+                var options = snapsvgzpd.dataStore[this.id].options;
+                
                 var currentTransformMatrix = zpdElement.node.getTransformToElement(rootSvgObject);
                 var currentZoom = currentTransformMatrix.a;
                 var originX = currentTransformMatrix.e;
@@ -627,7 +637,10 @@
                         zpdElement.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
                     }
 
-                }, interval, ease, callbackFunction);
+                }, interval, ease, function(){
+                    _viewChanged(options);
+                    callbackFunction()
+                });
             }
         };
 
@@ -642,8 +655,8 @@
 
             // check if we have this element in our zpd data storage
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
-
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
+                var options = snapsvgzpd.dataStore[this.id].options;
 
                 var gMatrix = zpdElement.node.getCTM(),
                     matrixX = _increaseDecreaseOrNumber(gMatrix.e, x),
@@ -652,6 +665,7 @@
 
                 // dataStore[me.id].transform(matrixString); // load <g> transform matrix
                 zpdElement.animate({ transform: matrixString }, interval || 10, ease || null, function () {
+                    _viewChanged(options);
                     if (cb) {
                         cb(null, zpdElement);
                     }
@@ -671,7 +685,7 @@
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
 
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
-
+                var options = snapsvgzpd.dataStore[this.id].options;
                 var gMatrix = zpdElement.node.getCTM(),
                     matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + gMatrix.e + "," + gMatrix.f + ")";
 
@@ -684,6 +698,7 @@
 
                 // dataStore[me.id].transform(matrixString); // load <g> transform matrix
                 zpdElement.animate({ transform: new Snap.Matrix(gMatrix).rotate(a, x, y) }, interval || 10, ease || null, function () {
+                    _viewChanged(options);
                     if (cb) {
                         cb(null, zpdElement);
                     }
@@ -700,23 +715,23 @@
             }
         }
 
-        function zoomToBBox(elem) {
-        };
-        var roundDownToClosest = function(value, factor){
-            Math.floor(value/factor) * factor
+
+        var roundToClosest = function(value, factor){
+            return Math.round(value/factor) * factor;
         }
         var zoomToElement = function(el, filling, interval, ease, cb){
             var zpdElement = snapsvgzpd.dataStore[this.id].element,
                 rootSvg = snapsvgzpd.dataStore[this.id].data.root,
                 width = rootSvg.clientWidth,
                 height = rootSvg.clientHeight,
-                minScale = (!!zpdElement.options.zoomThreshold)? zpdElement.options.zoomThreshold[0] : Math.NEGATIVE_INFINITY,
-                maxScale = (!!zpdElement.options.zoomThreshold)? zpdElement.options.zoomThreshold[1] : Math.POSITIVE_INFINITY,
+                options = snapsvgzpd.dataStore[this.id].options,
+                minScale = (!!options.zoomThreshold)? options.zoomThreshold[0] : Number.NEGATIVE_INFINITY,
+                maxScale = (!!options.zoomThreshold)? options.zoomThreshold[1] : Number.POSITIVE_INFINITY,
                 bbox = el.getBBox(),
                 x = (bbox.x + bbox.x2) / 2,
                 y = (bbox.y + bbox.y2) / 2,
                 realScale = filling / Math.max(bbox.w / width, bbox.h / height),
-                scale = roundDownToClosest(Math.min(Math.max(realScale, minScale), maxScale), zpdElement.options.zoomScale),
+                scale = roundToClosest(Math.min(Math.max(realScale, minScale), maxScale), options.zoomScale),
                 translateX = width / 2 - scale * x,
                 translateY = height / 2 - scale * y,
 
@@ -725,8 +740,10 @@
 
             if (interval === 0 || interval === undefined){
                 zpdElement.transform(m);
+                _viewChanged(snapsvgzpd.dataStore[self.id].options);
             }else{
                 zpdElement.animate({ transform: m }, interval, ease || null, function () {
+                    _viewChanged(options);
                     if (cb) {
                         cb(null, zpdElement);
                     }
