@@ -702,18 +702,24 @@
 
         function zoomToBBox(elem) {
         };
-
+        var roundDownToClosest = function(value, factor){
+            Math.floor(value/factor) * factor
+        }
         var zoomToElement = function(el, filling, interval, ease, cb){
             var zpdElement = snapsvgzpd.dataStore[this.id].element,
                 rootSvg = snapsvgzpd.dataStore[this.id].data.root,
                 width = rootSvg.clientWidth,
                 height = rootSvg.clientHeight,
+                minScale = (!!zpdElement.options.zoomThreshold)? zpdElement.options.zoomThreshold[0] : Math.NEGATIVE_INFINITY,
+                maxScale = (!!zpdElement.options.zoomThreshold)? zpdElement.options.zoomThreshold[1] : Math.POSITIVE_INFINITY,
                 bbox = el.getBBox(),
                 x = (bbox.x + bbox.x2) / 2,
                 y = (bbox.y + bbox.y2) / 2,
-                scale = filling / Math.max(bbox.w / width, bbox.h / height),
+                realScale = filling / Math.max(bbox.w / width, bbox.h / height),
+                scale = roundDownToClosest(Math.min(Math.max(realScale, minScale), maxScale), zpdElement.options.zoomScale),
                 translateX = width / 2 - scale * x,
                 translateY = height / 2 - scale * y,
+
                 m = Snap.matrix(scale, 0, 0, scale, translateX, translateY);
             // paper.animate({ transform: m }, 400, mina.easeout);
 
