@@ -136,7 +136,7 @@ paper.zoomToElement(paper.select('#my-element'), 3000, mina.bounce, function (er
     console.log(paper);
 });
 ```
-    element (must be Snap Element), interval (ms optional), mina (optional), callback (optional)
+    element (must be Snap Element), filling (req'd -> percent of screen height or width to fill, 1 being whole screen), interval (ms optional), mina (optional), callback (optional)
 
 
 #### panTo
