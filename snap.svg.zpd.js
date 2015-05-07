@@ -152,13 +152,23 @@
         /**
          * Instance an SVGPoint object with given event coordinates.
          */
+
+        var  _findPos = function findPos(obj) {
+          var curleft = curtop = 0;
+          if (obj.offsetParent) {
+            do {
+              curleft += obj.offsetLeft;
+              curtop += obj.offsetTop;
+            } while(obj = obj.offsetParent);
+          }
+          return [curleft,curtop];
+        };
+
         var _getEventPoint = function getEventPoint(event, svgNode) {
-
             var p = svgNode.node.createSVGPoint();
-
-            p.x = event.clientX - parseFloat(window.getComputedStyle(svgNode.node,null).getPropertyValue('left'));
-            p.y = event.clientY - parseFloat(window.getComputedStyle(svgNode.node,null).getPropertyValue('top'));
-
+            var svgPos = _findPos(svgNode.node);
+            p.x = event.clientX - svgPos[0];
+            p.y = event.clientY - svgPos[1];
             return p;
         };
 
