@@ -740,7 +740,7 @@
 
             if (interval === 0 || interval === undefined){
                 zpdElement.transform(m);
-                _viewChanged(snapsvgzpd.dataStore[self.id].options);
+                _viewChanged(options);
             }else{
                 zpdElement.animate({ transform: m }, interval, ease || null, function () {
                     _viewChanged(options);
