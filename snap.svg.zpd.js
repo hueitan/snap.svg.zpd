@@ -396,7 +396,7 @@
                 }
 
                 zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
-                viewChanged(zpdElement.options);
+                _viewChanged(zpdElement.options);
             };
 
             return {
@@ -608,7 +608,7 @@
                 // get a reference to the element
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
                 var options = snapsvgzpd.dataStore[this.id].options;
-                
+
                 var currentTransformMatrix = zpdElement.node.getTransformToElement(rootSvgObject);
                 var currentZoom = currentTransformMatrix.a;
                 var originX = currentTransformMatrix.e;
