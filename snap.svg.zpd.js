@@ -156,8 +156,8 @@
 
             var p = svgNode.node.createSVGPoint();
 
-            p.x = event.clientX;
-            p.y = event.clientY;
+            p.x = event.clientX - parseFloat(window.getComputedStyle(svgNode.node,null).getPropertyValue('left'));
+            p.y = event.clientY - parseFloat(window.getComputedStyle(svgNode.node,null).getPropertyValue('top'));
 
             return p;
         };
