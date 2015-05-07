@@ -729,7 +729,7 @@
         var roundToClosest = function(value, factor){
             return Math.round(value/factor) * factor;
         }
-        var zoomToElement = function(el, filling, interval, ease, cb){
+        var zoomToBB = function(bbox, filling, interval, ease, cb){
             var zpdElement = snapsvgzpd.dataStore[this.id].element,
                 rootSvg = snapsvgzpd.dataStore[this.id].data.root,
                 width = rootSvg.clientWidth,
@@ -737,10 +737,9 @@
                 options = snapsvgzpd.dataStore[this.id].options,
                 minScale = (!!options.zoomThreshold)? options.zoomThreshold[0] : Number.NEGATIVE_INFINITY,
                 maxScale = (!!options.zoomThreshold)? options.zoomThreshold[1] : Number.POSITIVE_INFINITY,
-                bbox = el.getBBox(),
                 x = (bbox.x + bbox.x2) / 2,
                 y = (bbox.y + bbox.y2) / 2,
-                realScale = filling / Math.max(bbox.w / width, bbox.h / height),
+                realScale = filling || 1 / Math.max(bbox.w / width, bbox.h / height),
                 scale = roundToClosest(Math.min(Math.max(realScale, minScale), maxScale), options.zoomScale),
                 translateX = width / 2 - scale * x,
                 translateY = height / 2 - scale * y,
@@ -761,12 +760,19 @@
             }
         }
 
+        var zoomToElement = function(el, filling, interval, ease, cb){
+            this.zoomToBB(el.getBBox(), filling, interval, ease, cb);
+        }
+         
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
         Paper.prototype.rotate = rotate;
         Paper.prototype.toggleZpdEnabled = toggleEnabled;
         Paper.prototype.zoomToElement = zoomToElement;
+        Paper.prototype.zoomToBB = zoomToBB;
+
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
