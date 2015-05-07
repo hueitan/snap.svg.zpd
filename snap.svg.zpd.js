@@ -729,7 +729,12 @@
         var roundToClosest = function(value, factor){
             return Math.round(value/factor) * factor;
         }
+
+        var roundToClosestScale = function(value, factor){
+            return 1/roundToClosest(1/value, factor);
+        }
         var zoomToBB = function(bbox, filling, interval, ease, cb){
+            var thisFilling = filling || 1;
             var zpdElement = snapsvgzpd.dataStore[this.id].element,
                 rootSvg = snapsvgzpd.dataStore[this.id].data.root,
                 width = rootSvg.clientWidth,
@@ -739,8 +744,8 @@
                 maxScale = (!!options.zoomThreshold)? options.zoomThreshold[1] : Number.POSITIVE_INFINITY,
                 x = (bbox.x + bbox.x2) / 2,
                 y = (bbox.y + bbox.y2) / 2,
-                realScale = filling || 1 / Math.max(bbox.w / width, bbox.h / height),
-                scale = roundToClosest(Math.min(Math.max(realScale, minScale), maxScale), options.zoomScale),
+                realScale =  thisFilling / Math.max(bbox.w / width, bbox.h / height),
+                scale = roundToClosestScale(Math.min(Math.max(realScale, minScale), maxScale), options.zoomScale),
                 translateX = width / 2 - scale * x,
                 translateY = height / 2 - scale * y,
 
