@@ -87,7 +87,8 @@
          */
         var snapsvgzpd = {
             uniqueIdPrefix: 'snapsvg-zpd-',     // prefix for the unique ids created for zpd
-            dataStore: {}                       // "global" storage for all our zpd elements
+            dataStore: {}    ,
+            enabled: true                   // "global" storage for all our zpd elements
         };
 
         /**
@@ -99,13 +100,13 @@
          * remove node parent but keep children
          */
         var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
-            if (!node.parentNode) {
+            if (!node.parentElement) {
                 return;
             }
             while (node.firstChild) {
-                node.parentNode.insertBefore(node.firstChild, node);
+                node.parentElement.insertBefore(node.firstChild, node);
             }
-            node.parentNode.removeChild(node);
+            node.parentElement.removeChild(node);
         };
 
         /**
@@ -151,13 +152,23 @@
         /**
          * Instance an SVGPoint object with given event coordinates.
          */
+
+        var  _findPos = function findPos(obj) {
+          var curleft = curtop = 0;
+          if (obj.offsetParent) {
+            do {
+              curleft += obj.offsetLeft;
+              curtop += obj.offsetTop;
+            } while(obj = obj.offsetParent);
+          }
+          return [curleft,curtop];
+        };
+
         var _getEventPoint = function getEventPoint(event, svgNode) {
-
             var p = svgNode.node.createSVGPoint();
-
-            p.x = event.clientX;
-            p.y = event.clientY;
-
+            var svgPos = _findPos(svgNode.node);
+            p.x = event.clientX - svgPos[0];
+            p.y = event.clientY - svgPos[1];
             return p;
         };
 
@@ -189,6 +200,12 @@
          *     </g>
          * </svg>
          */
+
+        var _viewChanged = function(options){
+            if (options.viewChanged){
+              options.viewChanged();  
+            }
+           } 
         var _initZpdElement = function initAndGetZpdElement (svgObject, options) {
 
             // get root of svg object
@@ -266,7 +283,7 @@
         var _getHandlerFunctions = function getHandlerFunctions(zpdElement) {
 
             var handleMouseUp = function handleMouseUp (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -280,10 +297,12 @@
 
                 }
 
+                _viewChanged(zpdElement.options);
+
             };
 
             var handleMouseDown = function handleMouseDown (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -317,7 +336,7 @@
             };
 
             var handleMouseMove = function handleMouseMove (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -349,7 +368,7 @@
             };
 
             var handleMouseWheel = function handleMouseWheel (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (!zpdElement.options.zoom) {
                     return;
                 }
@@ -387,6 +406,7 @@
                 }
 
                 zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
+                _viewChanged(zpdElement.options);
             };
 
             return {
@@ -456,7 +476,8 @@
                 zoom: true,         // enable or disable zooming (default enabled)
                 drag: false,        // enable or disable dragging (default disabled)
                 zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                zoomThreshold: null, // define zoom threshold
+                enabled: true
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin
@@ -596,6 +617,7 @@
 
                 // get a reference to the element
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
+                var options = snapsvgzpd.dataStore[this.id].options;
 
                 var currentTransformMatrix = zpdElement.node.getTransformToElement(rootSvgObject);
                 var currentZoom = currentTransformMatrix.a;
@@ -625,7 +647,10 @@
                         zpdElement.node.setAttribute('transform', _getSvgMatrixAsString(currentTransformMatrix));
                     }
 
-                }, interval, ease, callbackFunction);
+                }, interval, ease, function(){
+                    _viewChanged(options);
+                    callbackFunction()
+                });
             }
         };
 
@@ -640,8 +665,8 @@
 
             // check if we have this element in our zpd data storage
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
-
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
+                var options = snapsvgzpd.dataStore[this.id].options;
 
                 var gMatrix = zpdElement.node.getCTM(),
                     matrixX = _increaseDecreaseOrNumber(gMatrix.e, x),
@@ -650,6 +675,7 @@
 
                 // dataStore[me.id].transform(matrixString); // load <g> transform matrix
                 zpdElement.animate({ transform: matrixString }, interval || 10, ease || null, function () {
+                    _viewChanged(options);
                     if (cb) {
                         cb(null, zpdElement);
                     }
@@ -669,7 +695,7 @@
             if (snapsvgzpd.dataStore.hasOwnProperty(self.id)) {
 
                 var zpdElement = snapsvgzpd.dataStore[self.id].element;
-
+                var options = snapsvgzpd.dataStore[this.id].options;
                 var gMatrix = zpdElement.node.getCTM(),
                     matrixString = "matrix(" + gMatrix.a + "," + gMatrix.b + "," + gMatrix.c + "," + gMatrix.d + "," + gMatrix.e + "," + gMatrix.f + ")";
 
@@ -682,6 +708,7 @@
 
                 // dataStore[me.id].transform(matrixString); // load <g> transform matrix
                 zpdElement.animate({ transform: new Snap.Matrix(gMatrix).rotate(a, x, y) }, interval || 10, ease || null, function () {
+                    _viewChanged(options);
                     if (cb) {
                         cb(null, zpdElement);
                     }
@@ -690,10 +717,67 @@
             }
         };
 
+        var toggleEnabled = function(isEnabled){
+            if (isEnabled !== undefined){
+                snapsvgzpd.enabled = isEnabled;
+            }else{
+                snapsvgzpd.enabled = !snapsvgzpd.enabled;
+            }
+        }
+
+
+        var roundToClosest = function(value, factor){
+            return Math.round(value/factor) * factor;
+        }
+
+        var roundToClosestScale = function(value, factor){
+            return 1/roundToClosest(1/value, factor);
+        }
+        var zoomToBB = function(bbox, filling, interval, ease, cb){
+            var thisFilling = filling || 1;
+            var zpdElement = snapsvgzpd.dataStore[this.id].element,
+                rootSvg = snapsvgzpd.dataStore[this.id].data.root,
+                width = rootSvg.clientWidth,
+                height = rootSvg.clientHeight,
+                options = snapsvgzpd.dataStore[this.id].options,
+                minScale = (!!options.zoomThreshold)? options.zoomThreshold[0] : Number.NEGATIVE_INFINITY,
+                maxScale = (!!options.zoomThreshold)? options.zoomThreshold[1] : Number.POSITIVE_INFINITY,
+                x = (bbox.x + bbox.x2) / 2,
+                y = (bbox.y + bbox.y2) / 2,
+                realScale =  thisFilling / Math.max(bbox.w / width, bbox.h / height),
+                scale = roundToClosestScale(Math.min(Math.max(realScale, minScale), maxScale), options.zoomScale),
+                translateX = width / 2 - scale * x,
+                translateY = height / 2 - scale * y,
+
+                m = Snap.matrix(scale, 0, 0, scale, translateX, translateY);
+            // paper.animate({ transform: m }, 400, mina.easeout);
+
+            if (interval === 0 || interval === undefined){
+                zpdElement.transform(m);
+                _viewChanged(options);
+            }else{
+                zpdElement.animate({ transform: m }, interval, ease || null, function () {
+                    _viewChanged(options);
+                    if (cb) {
+                        cb(null, zpdElement);
+                    }
+                });
+            }
+        }
+
+        var zoomToElement = function(el, filling, interval, ease, cb){
+            this.zoomToBB(el.getBBox(), filling, interval, ease, cb);
+        }
+         
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
         Paper.prototype.rotate = rotate;
+        Paper.prototype.toggleZpdEnabled = toggleEnabled;
+        Paper.prototype.zoomToElement = zoomToElement;
+        Paper.prototype.zoomToBB = zoomToBB;
+
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)

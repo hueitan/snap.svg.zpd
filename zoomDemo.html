@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>A zoom/pan/drag/rotate plugin for Snap.svg</title>
+        <style>
+            html, body { margin:0; padding:0; overflow:hidden }
+            svg { position:fixed; top:0; left:0; }
+            .dragText {
+                font-size: 100px;
+            }
+            .button {
+                position: fixed;
+                right: 50px;
+                bottom: 50px;
+                z-index: 100;
+            }
+        </style>
+
+        <script src="./lib/snap.svg.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script src="./snap.svg.zpd.js"></script>
+        <script>
+            var paper, container;
+
+
+            window.onload = function(){
+
+                Snap.load('lib/malaysia.svg', function (data) {
+                    container = document.getElementById('svg-container');
+                    svgNode = data.node.children[0];
+                    container.appendChild(svgNode);
+                    paper = Snap(svgNode);
+                    var bbox = paper.select('g').getBBox();
+                    paper.attr({'height': bbox.h, 'width':bbox.w});
+                    paper.zpd({
+                        'viewChanged':function(){
+                            console.log('view change');
+                        }
+                    });
+                    // viewSelector('path[qs\\:layer="1301-Gross Building Area"]');
+                    var ele = paper.selectAll('.land').forEach(function(el){
+                        el.click(function(){
+                            paper.zoomToElement(this, 0.7, 500);
+                        });
+                    });
+                    
+                });
+
+                // UI improvement needed
+                var intervalF;
+                var clearIntervalF = function () {
+                    clearInterval(intervalF);
+                }
+                document.getElementById('location').onmousedown = function () {
+                    paper.panTo(0, 0);
+                };
+                document.getElementById('left').onmousedown = function () {
+                    paper.panTo('-10');
+                    intervalF = setInterval(function () {
+                        paper.panTo('-10');
+                    }, 100);
+                };
+                document.getElementById('left').onmouseup = clearIntervalF;
+                document.getElementById('left').onmouseleave = clearIntervalF;
+                document.getElementById('right').onmousedown = function () {
+                    paper.panTo('+10');
+                    intervalF = setInterval(function () {
+                        paper.panTo('+10');
+                    }, 100);
+                };
+                document.getElementById('right').onmouseup = clearIntervalF;
+                document.getElementById('right').onmouseleave = clearIntervalF;
+                document.getElementById('up').onmousedown = function () {
+                    paper.panTo('+0', '-10');
+                    intervalF = setInterval(function () {
+                        paper.panTo('+0', '-10');
+                    }, 100);
+                };
+                document.getElementById('up').onmouseup = clearIntervalF;
+                document.getElementById('up').onmouseleave = clearIntervalF;
+                document.getElementById('down').onmousedown = function () {
+                    paper.panTo('+0', '+10');
+                    intervalF = setInterval(function () {
+                        paper.panTo('+0', '+10');
+                    }, 100);
+                };
+                document.getElementById('down').onmouseup = clearIntervalF;
+                document.getElementById('down').onmouseleave = clearIntervalF;
+                document.getElementById('rotateL').onmousedown = function () {
+                    paper.rotate(-15);
+                    intervalF = setInterval(function () {
+                        paper.rotate(-15);
+                    }, 100);
+                };
+                document.getElementById('rotateL').onmouseup = clearIntervalF;
+                document.getElementById('rotateL').onmouseleave = clearIntervalF;
+                document.getElementById('rotateR').onmousedown = function () {
+                    paper.rotate(15);
+                    intervalF = setInterval(function () {
+                        paper.rotate(15);
+                    }, 100);
+                };
+                document.getElementById('rotateR').onmouseup = clearIntervalF;
+                document.getElementById('rotateR').onmouseleave = clearIntervalF;
+                document.getElementById('zoom2x').onmousedown = function () {
+                    paper.zoomTo(2, 400);
+                };
+                document.getElementById('zoom1x').onmousedown = function () {
+                    paper.zoomTo(1, 400);
+                };
+                document.getElementById('save').onmousedown = function () {
+                    paper.zpd('save', function (err, data) {
+                        var output = JSON.stringify(data);
+                        alert('Save Data:' + output);
+                    });
+                };
+                document.getElementById('threshold').onmousedown = function () {
+                    paper.zoomTo(1, 400);
+                    paper.zpd({ drag: true, zoomThreshold: [0.5, 3] });
+                };
+                document.onkeydown = function (e) {
+                    switch(e.keyCode) {
+                        case 37: // left
+                            paper.panTo('-10');
+                            break;
+                        case 38: // up
+                            paper.panTo('+0', '-10');
+                            break;
+                        case 39: // right
+                            paper.panTo('+10');
+                            break;
+                        case 40: // down
+                            paper.panTo('+0', '+10');
+                            break;
+                    }
+                };
+
+                document.getElementById('destroy').onmousedown = function () {
+                    paper.zpd('destroy');
+                };
+
+                document.getElementById('reapply').onmousedown = function () {
+                   applyZpd();
+                };
+
+                // settings
+                // paper.zpd({ zoom: true, pan: true, drag: true, zoomScale: 0.2 });
+                // paper.zpd(function (err, paper) { console.log(paper); });
+                // paper.zpd({ zoom: false }, function (err, paper) { console.log(paper); });
+
+                // zoomTo
+                // paper.zoomTo(1.5, 1000, mina.bounce, function (err, paper) { console.log(paper); });
+
+                // destroy
+                // paper.zpd('destroy');
+
+                // load
+                // paper.zpd({ load: {a:0.6787972450256348,b:0,c:0,d:0.6787972450256348,e:159.63783264160156,f:12.84811782836914}});
+                // 
+            }
+
+        </script>
+    </head>
+    <body>
+        <div id="svg-container"></div>
+        <div class="button">
+            <button id="location">To (0,0) Location</button>
+            <br/>
+            <button id="up">Up</button>
+            <button id="down">Down</button>
+            <br/>
+            <button id="left">Left</button>
+            <button id="right">Right</button>
+            <br/>
+
+            <button id="rotateL">Rotate -15 deg</button>
+            <button id="rotateR">Rotate 15 deg</button>
+            <br/>
+
+            <button id="zoom2x">Zoom To 2x</button>
+            <button id="zoom1x">Zoom To 1x</button>
+            <br/>
+
+            <button id="save">Save</button>
+            <button id="threshold">Zoom Threshold [0.5,3]</button>
+            <br/>
+
+            <button id="destroy">Destroy</button>
+            <button id="reapply">Re-Apply</button>
+            <br/>
+            -- or use arrow key --
+        </div>
+
+    </body>
+
+</html>
