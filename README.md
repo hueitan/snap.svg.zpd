@@ -129,6 +129,16 @@ paper.zoomTo(1.5, 3000, mina.bounce, function (err, paper) {
 ```
     zoom (must > 0), interval (ms optional), mina (optional), callback (optional)
 
+#### zoomToElement
+
+```js
+paper.zoomToElement(paper.select('#my-element'), 3000, mina.bounce, function (err, paper) {
+    console.log(paper);
+});
+```
+    element (must be Snap Element), filling (req'd -> percent of screen height or width to fill, 1 being whole screen), interval (ms optional), mina (optional), callback (optional)
+
+
 #### panTo
 
 ```js
@@ -141,6 +151,8 @@ paper.panTo(100, 100, 3000, mina.bounce, function (err, paper) {
 ```
     x, y (can be number or string with + -), interval (ms optional), mina (optional), callback (optional)
 
+
+
 #### rotate
 
 ```js
@@ -150,6 +162,15 @@ paper.panTo(a, x, y, mina.bounce, function (err, paper) {
 });
 ```
     a (rotate degree) x, y (original point), interval (ms optional), mina (optional), callback (optional)
+
+#### toggleZpdEnabled
+By default, zpd is enabled, but you can toggle or set its activation using this function.  
+
+```js
+paper.toggleZpdEnabled();  // toggle off 
+paper.toggleZpdEnabled(true); // sets to on
+paper.toggleZpdEnabled(false); // sets to off
+```
 
 ### Experimental: Edit
 to add an element to the transformation matrix.

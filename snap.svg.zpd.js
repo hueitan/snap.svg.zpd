@@ -87,7 +87,8 @@
          */
         var snapsvgzpd = {
             uniqueIdPrefix: 'snapsvg-zpd-',     // prefix for the unique ids created for zpd
-            dataStore: {}                       // "global" storage for all our zpd elements
+            dataStore: {}    ,
+            enabled: true                   // "global" storage for all our zpd elements
         };
 
         /**
@@ -99,13 +100,13 @@
          * remove node parent but keep children
          */
         var _removeNodeKeepChildren = function removeNodeKeepChildren(node) {
-            if (!node.parentNode) {
+            if (!node.parentElement) {
                 return;
             }
             while (node.firstChild) {
-                node.parentNode.insertBefore(node.firstChild, node);
+                node.parentElement.insertBefore(node.firstChild, node);
             }
-            node.parentNode.removeChild(node);
+            node.parentElement.removeChild(node);
         };
 
         /**
@@ -277,7 +278,7 @@
         var _getHandlerFunctions = function getHandlerFunctions(zpdElement) {
 
             var handleMouseUp = function handleMouseUp (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -294,7 +295,7 @@
             };
 
             var handleMouseDown = function handleMouseDown (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -328,7 +329,7 @@
             };
 
             var handleMouseMove = function handleMouseMove (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
@@ -360,7 +361,7 @@
             };
 
             var handleMouseWheel = function handleMouseWheel (event) {
-
+                if (!snapsvgzpd.enabled) {return;}
                 if (!zpdElement.options.zoom) {
                     return;
                 }
@@ -467,7 +468,8 @@
                 zoom: true,         // enable or disable zooming (default enabled)
                 drag: false,        // enable or disable dragging (default disabled)
                 zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                zoomThreshold: null, // define zoom threshold
+                enabled: true
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin
@@ -701,10 +703,48 @@
             }
         };
 
+        var toggleEnabled = function(isEnabled){
+            if (isEnabled !== undefined){
+                snapsvgzpd.enabled = isEnabled;
+            }else{
+                snapsvgzpd.enabled = !snapsvgzpd.enabled;
+            }
+        }
+
+        function zoomToBBox(elem) {
+        };
+
+        var zoomToElement = function(el, filling, interval, ease, cb){
+            var zpdElement = snapsvgzpd.dataStore[this.id].element,
+                rootSvg = snapsvgzpd.dataStore[this.id].data.root,
+                width = rootSvg.clientWidth,
+                height = rootSvg.clientHeight,
+                bbox = el.getBBox(),
+                x = (bbox.x + bbox.x2) / 2,
+                y = (bbox.y + bbox.y2) / 2,
+                scale = filling / Math.max(bbox.w / width, bbox.h / height),
+                translateX = width / 2 - scale * x,
+                translateY = height / 2 - scale * y,
+                m = Snap.matrix(scale, 0, 0, scale, translateX, translateY);
+            // paper.animate({ transform: m }, 400, mina.easeout);
+
+            if (interval === 0 || interval === undefined){
+                zpdElement.transform(m);
+            }else{
+                zpdElement.animate({ transform: m }, interval, ease || null, function () {
+                    if (cb) {
+                        cb(null, zpdElement);
+                    }
+                });
+            }
+        }
+
         Paper.prototype.zpd = zpd;
         Paper.prototype.zoomTo = zoomTo;
         Paper.prototype.panTo = panTo;
         Paper.prototype.rotate = rotate;
+        Paper.prototype.toggleZpdEnabled = toggleEnabled;
+        Paper.prototype.zoomToElement = zoomToElement;
 
         /** More Features to add (click event) help me if you can **/
         // Element.prototype.panToCenter = panToCenter; // arg (ease, interval, cb)
