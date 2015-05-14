@@ -189,7 +189,8 @@ matrix Y = (original Y + offsetY) / zoom
 ### Contributor List
 
 [Huei Tan](https://github.com/huei90) <br/>
-[Ramon Saccilotto](https://github.com/tikiatua)
+[Ramon Saccilotto](https://github.com/tikiatua) <br/>
+and [you](https://github.com/huei90/snap.svg.zpd/graphs/contributors)!
 
 ### Reference
 
