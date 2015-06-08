@@ -120,6 +120,14 @@ paper.zpd('origin');
 ```
     back to the origin location
 
+#### paper.zpd('toggle')
+
+```js
+paper.zpd('toggle');
+paper.zpd('toggle', function (err, state) { console.log(state); }); // return current enable state
+```
+    By default, zpd is enabled, but you can toggle or set its activation using this function. (Useful to toggle mouse event (zpd))
+
 #### zoomTo
 
 ```js

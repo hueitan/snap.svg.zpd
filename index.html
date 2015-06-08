@@ -49,6 +49,7 @@
 
             <button id="destroy">Destroy</button>
             <button id="reapply">Re-Apply</button>
+            <button id="toggle">Toggle</button>
             <br/>
             -- or use arrow key --
         </div>
@@ -173,7 +174,11 @@
             };
 
             document.getElementById('reapply').onmousedown = function () {
-               applyZpd();
+                applyZpd();
+            };
+
+            document.getElementById('toggle').onmousedown = function () {
+                paper.zpd('toggle');
             };
 
             // settings

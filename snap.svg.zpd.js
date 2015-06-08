@@ -87,7 +87,8 @@
          */
         var snapsvgzpd = {
             uniqueIdPrefix: 'snapsvg-zpd-',     // prefix for the unique ids created for zpd
-            dataStore: {}                       // "global" storage for all our zpd elements
+            dataStore: {},                      // "global" storage for all our zpd elements
+            enable: true                        // By default, snapsvgzpd should enable, zpd('toggle') to toggle enable or disable
         };
 
         /**
@@ -282,6 +283,8 @@
                     event.preventDefault();
                 }
 
+                if (!snapsvgzpd.enable) return;
+
                 event.returnValue = false;
 
                 if (zpdElement.data.state == 'pan' || zpdElement.data.state == 'drag') {
@@ -298,6 +301,8 @@
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
+
+                if (!snapsvgzpd.enable) return;
 
                 event.returnValue = false;
 
@@ -332,6 +337,8 @@
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
+
+                if (!snapsvgzpd.enable) return;
 
                 event.returnValue = false;
 
@@ -368,6 +375,8 @@
                 if (event.preventDefault) {
                     event.preventDefault();
                 }
+
+                if (!snapsvgzpd.enable) return;
 
                 event.returnValue = false;
 
@@ -470,7 +479,7 @@
                 zoomThreshold: null // define zoom threshold
             };
 
-            // the situation event of zpd, may be init, reinit, destroy, save, origin
+            // the situation event of zpd, may be init, reinit, destroy, save, origin, toggle
             var situation,
                 situationState = {
                     init: 'init',
@@ -478,7 +487,8 @@
                     destroy: 'destroy',
                     save: 'save',
                     origin: 'origin',
-                    callback: 'callback'
+                    callback: 'callback',
+                    toggle: 'toggle'
                 };
 
             var zpdElement = null;
@@ -578,6 +588,18 @@
                     // callback
                     if (callbackFunc) {
                         callbackFunc(null, zpdElement);
+                    }
+
+                    return;
+
+                case situationState.toggle:
+
+                    // toggle enabled
+                    snapsvgzpd.enable = !snapsvgzpd.enable;
+
+                    // callback
+                    if (callbackFunc) {
+                        callbackFunc(null, snapsvgzpd.enable);
                     }
 
                     return;
