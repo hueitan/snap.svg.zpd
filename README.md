@@ -1,4 +1,9 @@
-# snap.svg.zpd
+<h1 align="center">
+	<img width="360" src="https://cloud.githubusercontent.com/assets/2560096/8153356/5ddf66ee-135f-11e5-88b6-403e5bf18730.png" alt="snap.svg.zpd">
+	<br>
+</h1>
+
+> snap.svg.zpd  
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/huei90/snap.svg.zpd?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A zoom/pan/drag plugin for Snap.svg
