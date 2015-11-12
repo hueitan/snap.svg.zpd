@@ -130,10 +130,17 @@
          */
         var _setCTM = function setCTM(element, matrix, threshold) {
             if (threshold && typeof threshold === 'object') { // array [0.5,2]
-                if (matrix.a <= threshold[0]) {
+                var oldMatrix = Snap(element).transform().globalMatrix;
+
+                if (matrix.a < oldMatrix.a && matrix.a < threshold[0]) {
+                    return;
+                } else if (matrix.a > oldMatrix.a && matrix.a > threshold[1]) {
                     return;
                 }
-                if (matrix.d >= threshold[1]) {
+
+                if (matrix.d < oldMatrix.d && matrix.d < threshold[0]) {
+                    return;
+                } else if (matrix.d > oldMatrix.d && matrix.d > threshold[1]) {
                     return;
                 }
             }
