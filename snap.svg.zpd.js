@@ -356,7 +356,7 @@
                     // Pan mode
                     var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
 
-                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y));
+                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y), zpdElement.options.zoomThreshold);
 
                 } else if (zpdElement.data.state == 'drag' && zpdElement.options.drag) {
 
@@ -367,7 +367,8 @@
                             zpdElement.data.root.createSVGMatrix()
                             .translate(dragPoint.x - zpdElement.data.stateOrigin.x, dragPoint.y - zpdElement.data.stateOrigin.y)
                             .multiply(g.getCTM().inverse())
-                            .multiply(zpdElement.data.stateTarget.getCTM()));
+                            .multiply(zpdElement.data.stateTarget.getCTM()),
+                            zpdElement.options.zoomThreshold);
 
                     zpdElement.data.stateOrigin = dragPoint;
                 }
