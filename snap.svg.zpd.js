@@ -79,6 +79,12 @@
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Andrea Leofreddi.
  */
+
+SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(elem) {
+	return elem.getScreenCTM().inverse().multiply(this.getScreenCTM());
+};
+
+
 (function (Snap) {
     Snap.plugin(function (Snap, Element, Paper, glob, Fragment) {
 
