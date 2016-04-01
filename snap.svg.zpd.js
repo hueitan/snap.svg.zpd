@@ -165,16 +165,16 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
         /**
          * Instance an SVGPoint object with given event coordinates.
          */
-         var _findPos = function findPos(obj) {
-           var curleft = curtop = 0;
-           if (obj.offsetParent) {
-               do {
-                   curleft += obj.offsetLeft;
-                   curtop += obj.offsetTop;
-               } while(obj = obj.offsetParent);
-           }
-           return [curleft,curtop];
+        var _findPos = function findPos(obj) {
+          var curleft = curtop = 0;
+          var boundingClientRect = obj.getBoundingClientRect();
+          if (boundingClientRect) {
+            curleft = boundingClientRect.left;
+            curtop = boundingClientRect.top;
+          }
+          return [curleft, curtop];
         };
+
         var _getEventPoint = function getEventPoint(event, svgNode) {
 
             var p = svgNode.node.createSVGPoint(),
