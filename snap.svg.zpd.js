@@ -489,8 +489,8 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     if (zpdElement.data.prevZoomDistance != null) {
                         var delta = 0;
 
-                        if (zpdElement.data.prevZoomDistance > distance) delta = -0.1111111111111111;
-                        else delta = 0.1111111111111111;
+                        if (zpdElement.data.prevZoomDistance > distance) delta = -0.15;
+                        else delta = 0.15;
                         
                         _handleZoomingEvent(event, zpdElement, delta);
                     }
