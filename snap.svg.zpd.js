@@ -378,7 +378,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 event.returnValue = false;
 
                 // Detect if multi-touch and set touchZoom variable, this will be used in determining when to pan or zoom
-                zpdElement.data.touchZoom = _isTwoTouch(event);
+                if (zpdElement.options.touch) zpdElement.data.touchZoom = _isTwoTouch(event);
 
                 var g = zpdElement.element.node;
 
@@ -469,7 +469,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
             
             var handleTouchMove = function handleTouchMove (event) {
 
-                if (!zpdElement.options.zoom) {
+                if (!zpdElement.options.zoom || !zpdElement.options.touch) {
                     return;
                 }
 
@@ -588,11 +588,12 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             // define some custom options
             var zpdOptions = {
-                pan: true,          // enable or disable panning (default enabled)
-                zoom: true,         // enable or disable zooming (default enabled)
-                drag: false,        // enable or disable dragging (default disabled)
-                zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                pan: true,           // enable or disable panning (default enabled)
+                zoom: true,          // enable or disable zooming (default enabled)
+                drag: false,         // enable or disable dragging (default disabled)
+                zoomScale: 0.2,      // define zoom sensitivity
+                zoomThreshold: null, // define zoom threshold
+                touch: true          // enable or disable touch (default enabled)
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin, toggle
