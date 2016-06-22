@@ -481,21 +481,22 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                 event.returnValue = false;
 
-                // If multi-touch is true, then we are zooming instead of panning or dragging
+                // If multi-touch is true, then we are zooming instead of panning or dragging.
                 if (zpdElement.data.touchZoom) {
 
                     var distance = _getMultiTouchDistance(event);
 
                     if (zpdElement.data.prevZoomDistance != null) {
-                        var delta = 0;
+                        // The delta value is set to 0.15 as it best matches the zoom sensitivity in browsers. Use zoomScale option to change the zoom sensitivity.
+                        var delta = 0.15; // Case for the pinch being opened.
 
-                        if (zpdElement.data.prevZoomDistance > distance) delta = -0.15;
-                        else delta = 0.15;
+                        // Case for pinch being closed, make the delta negative
+                        if (zpdElement.data.prevZoomDistance > distance) delta = delta * -1;
                         
                         _handleZoomingEvent(event, zpdElement, delta);
                     }
 
-                    // Store the distance between touch positions so we can compare the changes to see if it's getting larger or smaller
+                    // Store the distance between touch positions so we can compare the changes to see if it's getting larger or smaller.
                     zpdElement.data.prevZoomDistance = distance;
                 } else {
 
