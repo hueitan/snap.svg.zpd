@@ -180,10 +180,63 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
             var p = svgNode.node.createSVGPoint(),
             svgPos = _findPos(svgNode.node);
 
-            p.x = event.clientX - svgPos[0];
-            p.y = event.clientY - svgPos[1];
-
+            if (typeof event.touches != 'undefined') {
+                p.x = event.touches[0].clientX - svgPos[0];
+                p.y = event.touches[0].clientY - svgPos[1];
+            } else {
+                p.x = event.clientX - svgPos[0];
+                p.y = event.clientY - svgPos[1];
+            }
+            
             return p;
+        };
+        
+        /**
+         * Detect multi-touch (i.e. pinch)
+         */
+        var _isTwoTouch = function isTwoTouch(event) {
+
+            var b = false;
+            if (typeof event.touches != 'undefined' && event.touches.length == 2) {
+                b = true;
+            }
+            
+            return b;
+        };
+        
+        /**
+         * Calculate the distance between the 1st and 2nd touches
+         */
+        var _getMultiTouchDistance = function getMultiTouchDistance(event) {
+
+            return Math.sqrt(
+                (event.touches[0].clientX - event.touches[1].clientX) * (event.touches[0].clientX - event.touches[1].clientX) +
+                (event.touches[0].clientY - event.touches[1].clientY) * (event.touches[0].clientY - event.touches[1].clientY));
+        };
+
+        /**
+         * Common function to handle the zooming for both touch and mouse wheel.
+         */
+        var _handleZoomingEvent = function handleZoomingEvent(event, zpdElement, delta) {
+
+            var z = Math.pow(1 + zpdElement.options.zoomScale, delta);
+
+            var g = zpdElement.element.node;
+
+            var p = _getEventPoint(event, zpdElement.data.svg);
+
+            p = p.matrixTransform(g.getCTM().inverse());
+
+            // Compute new scale matrix in current mouse position
+            var k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+
+            _setCTM(g, g.getCTM().multiply(k), zpdElement.options.zoomThreshold);
+
+            if (typeof(stateTf) == 'undefined') {
+                zpdElement.data.stateTf = g.getCTM().inverse();
+            }
+
+            zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
         };
 
         /**
@@ -266,7 +319,9 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 state: 'none',
                 stateTarget: null,
                 stateOrigin: null,
-                stateTf: null
+                stateTf: null,
+                touchZoom: false,
+                prevZoomDistance: null,
             };
 
             // create an element with all required properties
@@ -290,7 +345,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
          */
         var _getHandlerFunctions = function getHandlerFunctions(zpdElement) {
 
-            var handleMouseUp = function handleMouseUp (event) {
+            var handleMouseOrTouchUp = function handleMouseOrTouchUp (event) {
 
                 if (event.preventDefault) {
                     event.preventDefault();
@@ -299,6 +354,9 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 if (!snapsvgzpd.enable) return;
 
                 event.returnValue = false;
+
+                // On touchend reset the touchZoom variable to false
+                zpdElement.data.touchZoom = false;
 
                 if (zpdElement.data.state == 'pan' || zpdElement.data.state == 'drag') {
 
@@ -309,7 +367,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             };
 
-            var handleMouseDown = function handleMouseDown (event) {
+            var handleMouseOrTouchDown = function handleMouseOrTouchDown (event) {
 
                 if (event.preventDefault) {
                     event.preventDefault();
@@ -318,6 +376,9 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 if (!snapsvgzpd.enable) return;
 
                 event.returnValue = false;
+
+                // Detect if multi-touch and set touchZoom variable, this will be used in determining when to pan or zoom
+                if (zpdElement.options.touch) zpdElement.data.touchZoom = _isTwoTouch(event);
 
                 var g = zpdElement.element.node;
 
@@ -403,50 +464,78 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     delta = event.detail / -9;       // Mozilla
                 }
 
-                var z = Math.pow(1 + zpdElement.options.zoomScale, delta);
+                _handleZoomingEvent(event, zpdElement, delta);
+            };
+            
+            var handleTouchMove = function handleTouchMove (event) {
 
-                var g = zpdElement.element.node;
-
-                var p = _getEventPoint(event, zpdElement.data.svg);
-
-                p = p.matrixTransform(g.getCTM().inverse());
-
-                // Compute new scale matrix in current mouse position
-                var k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-
-                _setCTM(g, g.getCTM().multiply(k), zpdElement.options.zoomThreshold);
-
-                if (typeof(stateTf) == 'undefined') {
-                    zpdElement.data.stateTf = g.getCTM().inverse();
+                if (!zpdElement.options.zoom || !zpdElement.options.touch) {
+                    return;
                 }
 
-                zpdElement.data.stateTf = zpdElement.data.stateTf.multiply(k.inverse());
+                if (event.preventDefault) {
+                    event.preventDefault();
+                }
+
+                if (!snapsvgzpd.enable) return;
+
+                event.returnValue = false;
+
+                // If multi-touch is true, then we are zooming instead of panning or dragging.
+                if (zpdElement.data.touchZoom) {
+
+                    var distance = _getMultiTouchDistance(event);
+
+                    if (zpdElement.data.prevZoomDistance != null) {
+                        // The delta value is set to 0.15 as it best matches the zoom sensitivity in browsers. Use zoomScale option to change the zoom sensitivity.
+                        var delta = 0.15; // Case for the pinch being opened.
+
+                        // Case for pinch being closed, make the delta negative
+                        if (zpdElement.data.prevZoomDistance > distance) delta = delta * -1;
+                        
+                        _handleZoomingEvent(event, zpdElement, delta);
+                    }
+
+                    // Store the distance between touch positions so we can compare the changes to see if it's getting larger or smaller.
+                    zpdElement.data.prevZoomDistance = distance;
+                } else {
+
+                    handleMouseMove (event);
+
+                }
             };
 
             return {
-                "mouseUp": handleMouseUp,
-                "mouseDown": handleMouseDown,
+                "mouseOrTouchUp": handleMouseOrTouchUp,
+                "mouseOrTouchDown": handleMouseOrTouchDown,
                 "mouseMove": handleMouseMove,
-                "mouseWheel": handleMouseWheel
+                "mouseWheel": handleMouseWheel,
+                "touchMove": handleTouchMove
             };
         };
 
 
         /**
          * Register handlers
-         * desktop and mobile (?)
+         * desktop and mobile
          */
         var _setupHandlers = function setupHandlers(svgElement, handlerFunctions) {
 
             // mobile
-            // (?)
+            if ('ontouchend' in document.documentElement) {
+            
+                svgElement.addEventListener('touchend', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.addEventListener('touchcancel', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.addEventListener('touchstart', handlerFunctions.mouseOrTouchDown, false);
+                // This event handles both panning and zooming
+                svgElement.addEventListener('touchmove', handlerFunctions.touchMove, false);
 
             // desktop
-            if ('onmouseup' in document.documentElement) {
+            } else if ('onmouseup' in document.documentElement) {
 
                 // IE < 9 would need to use the event onmouseup, but they do not support svg anyway..
-                svgElement.addEventListener('mouseup', handlerFunctions.mouseUp, false);
-                svgElement.addEventListener('mousedown', handlerFunctions.mouseDown, false);
+                svgElement.addEventListener('mouseup', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.addEventListener('mousedown', handlerFunctions.mouseOrTouchDown, false);
                 svgElement.addEventListener('mousemove', handlerFunctions.mouseMove, false);
 
                 if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
@@ -464,17 +553,31 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
          * remove event handlers
          */
         var _tearDownHandlers = function tearDownHandlers(svgElement, handlerFunctions) {
+        
+            // mobile
+            if ('ontouchend' in document.documentElement) {
+            
+                svgElement.removeEventListener('touchend', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.removeEventListener('touchcancel', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.removeEventListener('touchstart', handlerFunctions.mouseOrTouchDown, false);
+                // This event handles both panning and zooming
+                svgElement.removeEventListener('touchmove', handlerFunctions.touchMove, false);
 
-            svgElement.removeEventListener('mouseup', handlerFunctions.mouseUp, false);
-            svgElement.removeEventListener('mousedown', handlerFunctions.mouseDown, false);
-            svgElement.removeEventListener('mousemove', handlerFunctions.mouseMove, false);
+            // desktop
+            } else if ('onmouseup' in document.documentElement) {
 
-            if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
-                navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
-                svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
-            }
-            else {
-                svgElement.removeEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false);
+                svgElement.removeEventListener('mouseup', handlerFunctions.mouseOrTouchUp, false);
+                svgElement.removeEventListener('mousedown', handlerFunctions.mouseOrTouchDown, false);
+                svgElement.removeEventListener('mousemove', handlerFunctions.mouseMove, false);
+
+                if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 ||
+                    navigator.userAgent.toLowerCase().indexOf('trident') >= 0) {
+                    svgElement.removeEventListener('mousewheel', handlerFunctions.mouseWheel, false);
+                }
+                else {
+                    svgElement.removeEventListener('DOMMouseScroll', handlerFunctions.mouseWheel, false);
+                }
+
             }
         };
 
@@ -486,11 +589,12 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             // define some custom options
             var zpdOptions = {
-                pan: true,          // enable or disable panning (default enabled)
-                zoom: true,         // enable or disable zooming (default enabled)
-                drag: false,        // enable or disable dragging (default disabled)
-                zoomScale: 0.2,     // define zoom sensitivity
-                zoomThreshold: null // define zoom threshold
+                pan: true,           // enable or disable panning (default enabled)
+                zoom: true,          // enable or disable zooming (default enabled)
+                drag: false,         // enable or disable dragging (default disabled)
+                zoomScale: 0.2,      // define zoom sensitivity
+                zoomThreshold: null, // define zoom threshold
+                touch: true          // enable or disable touch (default enabled)
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin, toggle

@@ -88,6 +88,10 @@ paper.zpd(function (err, paper) {
 #### zoomThreshold
 
     array: min and max zoom level threshold [min, max] (default null)
+    
+#### touch
+
+    true or false: enable or disable touch support (default true)
 
 ### More
 
