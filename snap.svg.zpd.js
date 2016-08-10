@@ -134,22 +134,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
         /**
          * Sets the current transform matrix of an element.
          */
-        var _setCTM = function setCTM(element, matrix, threshold) {
-            if (threshold && typeof threshold === 'object') { // array [0.5,2]
-                var oldMatrix = Snap(element).transform().globalMatrix;
-
-                if (matrix.a < oldMatrix.a && matrix.a < threshold[0]) {
-                    return;
-                } else if (matrix.a > oldMatrix.a && matrix.a > threshold[1]) {
-                    return;
-                }
-
-                if (matrix.d < oldMatrix.d && matrix.d < threshold[0]) {
-                    return;
-                } else if (matrix.d > oldMatrix.d && matrix.d > threshold[1]) {
-                    return;
-                }
-            }
+        var _setCTM = function setCTM(element, matrix) {
             var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
             element.setAttribute("transform", s);
         };
@@ -220,8 +205,8 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
         var _handleZoomingEvent = function handleZoomingEvent(event, zpdElement, delta) {
 
             var z = Math.pow(1 + zpdElement.options.zoomScale, delta);
-
             var g = zpdElement.element.node;
+
 
             var p = _getEventPoint(event, zpdElement.data.svg);
 
@@ -230,7 +215,39 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
             // Compute new scale matrix in current mouse position
             var k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 
-            _setCTM(g, g.getCTM().multiply(k), zpdElement.options.zoomThreshold);
+            var matrix = g.getCTM().multiply(k);
+
+
+            // detecting if zoom threshold was exceeded
+            {
+
+                var recalculateMatrix = function recalculateMatrix(scale) {
+                    z = scale / g.getCTM().a;
+                    k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+                    matrix = g.getCTM().multiply(k);
+                    matrix.a = matrix.a.toFixed(4);
+                    matrix.d = matrix.d.toFixed(4);
+                }
+                
+                var threshold = zpdElement.options.zoomThreshold;
+
+                if (threshold && typeof threshold === 'object') { // array [0.5,2]
+                    var oldMatrix = Snap(g).transform().globalMatrix;
+
+                    if (   (matrix.a < oldMatrix.a && matrix.a < threshold[0])
+                        || (matrix.d < oldMatrix.d && matrix.d < threshold[0])) {
+                        
+                        recalculateMatrix(threshold[0]);
+
+                    } else if (   (matrix.a > oldMatrix.a && matrix.a > threshold[1])
+                               || (matrix.d > oldMatrix.d && matrix.d > threshold[1])) {
+
+                        recalculateMatrix(threshold[1]);
+                    }
+                }
+            }
+
+            _setCTM(g, matrix);
 
             if (typeof(stateTf) == 'undefined') {
                 zpdElement.data.stateTf = g.getCTM().inverse();
@@ -423,7 +440,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     // Pan mode
                     var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
 
-                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y), zpdElement.options.zoomThreshold);
+                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y));
 
                 } else if (zpdElement.data.state == 'drag' && zpdElement.options.drag) {
 
@@ -434,8 +451,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                             zpdElement.data.root.createSVGMatrix()
                             .translate(dragPoint.x - zpdElement.data.stateOrigin.x, dragPoint.y - zpdElement.data.stateOrigin.y)
                             .multiply(g.getCTM().inverse())
-                            .multiply(zpdElement.data.stateTarget.getCTM()),
-                            zpdElement.options.zoomThreshold);
+                            .multiply(zpdElement.data.stateTarget.getCTM()));
 
                     zpdElement.data.stateOrigin = dragPoint;
                 }
