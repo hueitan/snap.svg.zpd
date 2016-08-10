@@ -134,7 +134,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
         /**
          * Sets the current transform matrix of an element.
          */
-        var _setCTM = function setCTM(element, matrix, zoomThreshold) {
+        var _setCTM = function setCTM(element, matrix) {
             var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
             element.setAttribute("transform", s);
         };
@@ -247,7 +247,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 }
             }
 
-            _setCTM(g, matrix, zpdElement.options.zoomThreshold);
+            _setCTM(g, matrix);
 
             if (typeof(stateTf) == 'undefined') {
                 zpdElement.data.stateTf = g.getCTM().inverse();
@@ -440,7 +440,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     // Pan mode
                     var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
 
-                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y), zpdElement.options.zoomThreshold);
+                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y));
 
                 } else if (zpdElement.data.state == 'drag' && zpdElement.options.drag) {
 
@@ -451,8 +451,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                             zpdElement.data.root.createSVGMatrix()
                             .translate(dragPoint.x - zpdElement.data.stateOrigin.x, dragPoint.y - zpdElement.data.stateOrigin.y)
                             .multiply(g.getCTM().inverse())
-                            .multiply(zpdElement.data.stateTarget.getCTM()),
-                            zpdElement.options.zoomThreshold);
+                            .multiply(zpdElement.data.stateTarget.getCTM()));
 
                     zpdElement.data.stateOrigin = dragPoint;
                 }
