@@ -219,31 +219,28 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
 
             // detecting if zoom threshold was exceeded
-            {
+            var recalculateMatrix = function recalculateMatrix(scale) {
+                z = scale / g.getCTM().a;
+                k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+                matrix = g.getCTM().multiply(k);
+                matrix.a = matrix.a.toFixed(4);
+                matrix.d = matrix.d.toFixed(4);
+            }
+            
+            var threshold = zpdElement.options.zoomThreshold;
 
-                var recalculateMatrix = function recalculateMatrix(scale) {
-                    z = scale / g.getCTM().a;
-                    k = zpdElement.data.root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
-                    matrix = g.getCTM().multiply(k);
-                    matrix.a = matrix.a.toFixed(4);
-                    matrix.d = matrix.d.toFixed(4);
-                }
-                
-                var threshold = zpdElement.options.zoomThreshold;
+            if (threshold && typeof threshold === 'object') { // array [0.5,2]
+                var oldMatrix = Snap(g).transform().globalMatrix;
 
-                if (threshold && typeof threshold === 'object') { // array [0.5,2]
-                    var oldMatrix = Snap(g).transform().globalMatrix;
+                if (   (matrix.a < oldMatrix.a && matrix.a < threshold[0])
+                    || (matrix.d < oldMatrix.d && matrix.d < threshold[0])) {
+                    
+                    recalculateMatrix(threshold[0]);
 
-                    if (   (matrix.a < oldMatrix.a && matrix.a < threshold[0])
-                        || (matrix.d < oldMatrix.d && matrix.d < threshold[0])) {
-                        
-                        recalculateMatrix(threshold[0]);
+                } else if (   (matrix.a > oldMatrix.a && matrix.a > threshold[1])
+                            || (matrix.d > oldMatrix.d && matrix.d > threshold[1])) {
 
-                    } else if (   (matrix.a > oldMatrix.a && matrix.a > threshold[1])
-                               || (matrix.d > oldMatrix.d && matrix.d > threshold[1])) {
-
-                        recalculateMatrix(threshold[1]);
-                    }
+                    recalculateMatrix(threshold[1]);
                 }
             }
 
