@@ -38,6 +38,9 @@
  * // rotate
  * paper.rotate(15); // rotate 15 deg
  *
+ * // change pan directions
+ * paper.zpd({'panDirections':'horizontal'});
+ *
  *  Notice
  * ========
  * This usually use on present view only. Not for Storing, modifying the paper.
@@ -436,17 +439,35 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                     // Pan mode
                     var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
+                    
+                    var trans_x=0;
+                    var trans_y=0;
+                    if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'horizontal')) {
+                      var trans_x=p.x - zpdElement.data.stateOrigin.x;
+                    }
+                    if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'vertical')) {
+                      var trans_y=p.y - zpdElement.data.stateOrigin.y;
+                    }
 
-                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(p.x - zpdElement.data.stateOrigin.x, p.y - zpdElement.data.stateOrigin.y));
+                    _setCTM(g, zpdElement.data.stateTf.inverse().translate(trans_x,trans_y));
 
                 } else if (zpdElement.data.state == 'drag' && zpdElement.options.drag) {
 
                     // Drag mode
                     var dragPoint = _getEventPoint(event, zpdElement.data.svg).matrixTransform(g.getCTM().inverse());
 
+                    var trans_x=0;
+                    var trans_y=0;
+                    if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'horizontal')) {
+                      var trans_x=dragPoint.x - zpdElement.data.stateOrigin.x;
+                    }
+                    if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'vertical')) {
+                      var trans_y=dragPoint.y - zpdElement.data.stateOrigin.y;
+                    }
+                    
                     _setCTM(zpdElement.data.stateTarget,
                             zpdElement.data.root.createSVGMatrix()
-                            .translate(dragPoint.x - zpdElement.data.stateOrigin.x, dragPoint.y - zpdElement.data.stateOrigin.y)
+                            .translate(trans_x, trans_y)
                             .multiply(g.getCTM().inverse())
                             .multiply(zpdElement.data.stateTarget.getCTM()));
 
@@ -602,12 +623,13 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             // define some custom options
             var zpdOptions = {
-                pan: true,           // enable or disable panning (default enabled)
-                zoom: true,          // enable or disable zooming (default enabled)
-                drag: false,         // enable or disable dragging (default disabled)
-                zoomScale: 0.2,      // define zoom sensitivity
-                zoomThreshold: null, // define zoom threshold
-                touch: true          // enable or disable touch (default enabled)
+                pan: true,             // enable or disable panning (default enabled)
+                panDirections: 'both', // "both" | "horizontal" | "vertical"
+                zoom: true,            // enable or disable zooming (default enabled)
+                drag: false,           // enable or disable dragging (default disabled)
+                zoomScale: 0.2,        // define zoom sensitivity
+                zoomThreshold: null,   // define zoom threshold
+                touch: true            // enable or disable touch (default enabled)
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin, toggle
