@@ -12,8 +12,8 @@ This is an an adaptation of Andrea Leofreddi's [SVGPan library](https://code.goo
 
 This usually use on present view only. **NOT** for the purpose of Storing or Modifying the paper.
 
-[DEMO](http://huei90.github.io/snap.svg.zpd) [DEMO2](http://huei90.github.io/snap.svg.zpd/demo2.html)
-[DEMO3](http://huei90.github.io/snap.svg.zpd/reservation_seat.html)
+[DEMO](http://hueitan.github.io/snap.svg.zpd) [DEMO2](http://hueitan.github.io/snap.svg.zpd/demo2.html)
+[DEMO3](http://hueitan.github.io/snap.svg.zpd/reservation_seat.html)
 ### In the Wild
 
 Drop me an issue/PR for the showcase
@@ -205,9 +205,9 @@ matrix Y = (original Y + offsetY) / zoom
 
 ### Contributor List
 
-[Huei Tan](https://github.com/huei90) <br/>
+[Huei Tan](https://github.com/hueitan) <br/>
 [Ramon Saccilotto](https://github.com/tikiatua) <br/>
-and [you](https://github.com/huei90/snap.svg.zpd/graphs/contributors)!
+and [you](https://github.com/hueitan/snap.svg.zpd/graphs/contributors)!
 
 ### Reference
 
