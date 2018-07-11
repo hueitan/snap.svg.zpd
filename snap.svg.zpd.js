@@ -84,7 +84,7 @@
  */
 
 SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformToElement || function(elem) {
-	return elem.getScreenCTM().inverse().multiply(this.getScreenCTM());
+    return elem.getScreenCTM().inverse().multiply(this.getScreenCTM());
 };
 
 
@@ -175,10 +175,10 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 p.x = event.clientX - svgPos[0];
                 p.y = event.clientY - svgPos[1];
             }
-            
+
             return p;
         };
-        
+
         /**
          * Detect multi-touch (i.e. pinch)
          */
@@ -188,10 +188,10 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
             if (typeof event.touches != 'undefined' && event.touches.length == 2) {
                 b = true;
             }
-            
+
             return b;
         };
-        
+
         /**
          * Calculate the distance between the 1st and 2nd touches
          */
@@ -229,7 +229,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 matrix.a = matrix.a.toFixed(4);
                 matrix.d = matrix.d.toFixed(4);
             }
-            
+
             var threshold = zpdElement.options.zoomThreshold;
 
             if (threshold && typeof threshold === 'object') { // array [0.5,2]
@@ -237,7 +237,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                 if (   (matrix.a < oldMatrix.a && matrix.a < threshold[0])
                     || (matrix.d < oldMatrix.d && matrix.d < threshold[0])) {
-                    
+
                     recalculateMatrix(threshold[0]);
 
                 } else if (   (matrix.a > oldMatrix.a && matrix.a > threshold[1])
@@ -364,7 +364,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             var handleMouseOrTouchUp = function handleMouseOrTouchUp (event) {
 
-                if (event.preventDefault) {
+                if (event.preventDefault && zpdElement.options.preventDefaultEvent.handleMouseOrTouchUp) {
                     event.preventDefault();
                 }
 
@@ -386,7 +386,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             var handleMouseOrTouchDown = function handleMouseOrTouchDown (event) {
 
-                if (event.preventDefault) {
+                if (event.preventDefault && zpdElement.options.preventDefaultEvent.handleMouseOrTouchDown) {
                     event.preventDefault();
                 }
 
@@ -425,7 +425,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             var handleMouseMove = function handleMouseMove (event) {
 
-                if (event.preventDefault) {
+                if (event.preventDefault && zpdElement.options.preventDefaultEvent.handleMouseMove) {
                     event.preventDefault();
                 }
 
@@ -439,7 +439,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                     // Pan mode
                     var p = _getEventPoint(event, zpdElement.data.svg).matrixTransform(zpdElement.data.stateTf);
-                    
+
                     var trans_x=0;
                     var trans_y=0;
                     if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'horizontal')) {
@@ -464,7 +464,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     if ((zpdElement.options.panDirections == 'both') || (zpdElement.options.panDirections == 'vertical')) {
                       var trans_y=dragPoint.y - zpdElement.data.stateOrigin.y;
                     }
-                    
+
                     _setCTM(zpdElement.data.stateTarget,
                             zpdElement.data.root.createSVGMatrix()
                             .translate(trans_x, trans_y)
@@ -481,7 +481,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     return;
                 }
 
-                if (event.preventDefault) {
+                if (event.preventDefault && zpdElement.options.preventDefaultEvent.handleMouseWheel) {
                     event.preventDefault();
                 }
 
@@ -500,14 +500,14 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                 _handleZoomingEvent(event, zpdElement, delta);
             };
-            
+
             var handleTouchMove = function handleTouchMove (event) {
 
                 if (!zpdElement.options.zoom || !zpdElement.options.touch) {
                     return;
                 }
 
-                if (event.preventDefault) {
+                if (event.preventDefault && zpdElement.options.preventDefaultEvent.handleTouchMove) {
                     event.preventDefault();
                 }
 
@@ -526,7 +526,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                         // Case for pinch being closed, make the delta negative
                         if (zpdElement.data.prevZoomDistance > distance) delta = delta * -1;
-                        
+
                         _handleZoomingEvent(event, zpdElement, delta);
                     }
 
@@ -557,7 +557,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
             // mobile
             if ('ontouchend' in document.documentElement) {
-            
+
                 svgElement.addEventListener('touchend', handlerFunctions.mouseOrTouchUp, false);
                 svgElement.addEventListener('touchcancel', handlerFunctions.mouseOrTouchUp, false);
                 svgElement.addEventListener('touchstart', handlerFunctions.mouseOrTouchDown, false);
@@ -587,10 +587,10 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
          * remove event handlers
          */
         var _tearDownHandlers = function tearDownHandlers(svgElement, handlerFunctions) {
-        
+
             // mobile
             if ('ontouchend' in document.documentElement) {
-            
+
                 svgElement.removeEventListener('touchend', handlerFunctions.mouseOrTouchUp, false);
                 svgElement.removeEventListener('touchcancel', handlerFunctions.mouseOrTouchUp, false);
                 svgElement.removeEventListener('touchstart', handlerFunctions.mouseOrTouchDown, false);
@@ -629,7 +629,14 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 drag: false,           // enable or disable dragging (default disabled)
                 zoomScale: 0.2,        // define zoom sensitivity
                 zoomThreshold: null,   // define zoom threshold
-                touch: true            // enable or disable touch (default enabled)
+                touch: true,           // enable or disable touch (default enabled)
+                preventDefaultEvent: { // enable or disable preventDefault call in events (default enabled) WARNING may have unwanted effect
+                    handleMouseOrTouchUp: true,
+                    handleMouseOrTouchDown: true,
+                    handleMouseMove: true,
+                    handleMouseWheel: true,
+                    handleTouchMove: true
+                }
             };
 
             // the situation event of zpd, may be init, reinit, destroy, save, origin, toggle
@@ -660,8 +667,27 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                 // adapt the stored options, with the options passed in
                 if (typeof options === 'object') {
+                    if (options.preventDefaultEvent !== undefined && typeof options.preventDefaultEvent !== 'object') {
+                        options.preventDefaultEvent = {
+                            handleMouseOrTouchUp: !!options.preventDefaultEvent,
+                            handleMouseOrTouchDown: !!options.preventDefaultEvent,
+                            handleMouseMove: !!options.preventDefaultEvent,
+                            handleMouseWheel: !!options.preventDefaultEvent,
+                            handleTouchMove: !!options.preventDefaultEvent
+                        }
+                    }
+
                     for (var prop in options) {
-                        zpdElement.options[prop] = options[prop];
+                        if (typeof options[prop] === 'object') {
+                            if (typeof zpdElement.options[prop] !== 'object') {
+                                zpdElement.options[prop] = options[prop];
+                            }
+                            for (var subprop in options[prop]) {
+                                zpdElement.options[prop][subprop] = options[prop][subprop];
+                            }
+                        } else {
+                            zpdElement.options[prop] = options[prop];
+                        }
                     }
                     situation = situationState.reinit;
                 } else if (typeof options === 'string') {
@@ -672,8 +698,26 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
 
                 // adapt the default options
                 if (typeof options === 'object') {
+                    if (options.preventDefaultEvent !== undefined && typeof options.preventDefaultEvent !== 'object') {
+                        options.preventDefaultEvent = {
+                            handleMouseOrTouchUp: !!options.preventDefaultEvent,
+                            handleMouseOrTouchDown: !!options.preventDefaultEvent,
+                            handleMouseMove: !!options.preventDefaultEvent,
+                            handleMouseWheel: !!options.preventDefaultEvent,
+                            handleTouchMove: !!options.preventDefaultEvent
+                        }
+                    }
                     for (var prop2 in options) {
-                        zpdOptions[prop2] = options[prop2];
+                        if (typeof options[prop2] === 'object') {
+                            if (typeof zpdOptions[prop2] !== 'object') {
+                                zpdOptions[prop2] = options[prop2];
+                            }
+                            for (var subprop2 in options[prop2]) {
+                                zpdOptions[prop2][subprop2] = options[prop2][subprop2];
+                            }
+                        } else {
+                            zpdOptions[prop2] = options[prop2];
+                        }
                     }
                     situation = situationState.init;
                 } else if (typeof options === 'string') {
