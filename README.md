@@ -88,10 +88,22 @@ paper.zpd(function (err, paper) {
 #### zoomThreshold
 
     array: min and max zoom level threshold [min, max] (default null)
-    
+
 #### touch
 
     true or false: enable or disable touch support (default true)
+
+#### preventDefaultEvent
+
+    true or false: enable or disable call to preventDefault in events (default true)
+    or an object with these values:
+        - `handleMouseOrTouchUp`: true or false: enable or disable call to preventDefault for this particular event (default true)
+        - `handleMouseOrTouchDown`: true or false: enable or disable call to preventDefault for this particular event (default true)
+        - `handleMouseMove`: true or false: enable or disable call to preventDefault for this particular event (default true)
+        - `handleMouseWheel`: true or false: enable or disable call to preventDefault for this particular event (default true)
+        - `handleTouchMove`: true or false: enable or disable call to preventDefault for this particular event (default true)
+
+    if defined as a boolean every value of the object will take the defined value
 
 ### More
 
