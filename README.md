@@ -105,6 +105,8 @@ paper.zpd(function (err, paper) {
 
     if defined as a boolean every value of the object will take the defined value
 
+<span style="color: red;">WARNING</span> : using this option can lead to unexpected behavior.
+
 ### More
 
 #### paper.zpd('destroy')
