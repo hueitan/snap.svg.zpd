@@ -162,7 +162,7 @@ paper.panTo(100, 100, 3000, mina.bounce, function (err, paper) {
 
 ```js
 paper.rotate(15);
-paper.panTo(a, x, y, mina.bounce, function (err, paper) {
+paper.rotate(a, x, y, mina.bounce, function (err, paper) {
     console.log(paper);
 });
 ```
