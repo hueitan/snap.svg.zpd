@@ -1,11 +1,8 @@
 {
   "name": "snap.svg.zpd",
   "main": "snap.svg.zpd.js",
-  "version": "0.0.11",
-  "homepage": "https://github.com/huei90/snap.svg.zpd",
-  "authors": [
-    "Huei <huei90@gmail.com>"
-  ],
+  "version": "0.0.12",
+  "homepage": "https://github.com/hueitan/snap.svg.zpd",
   "description": "A zoom/pan/drag plugin for Snap.svg",
   "keywords": [
     "snapsvg",
