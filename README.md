@@ -17,10 +17,7 @@ Drop me an issue/PR for the showcase
 
 ### Install
 
-    $ bower install snap.svg.zpd --save
-
     $ npm install snap.svg.zpd --save
-
 
 ### How The Plugin Works
 
