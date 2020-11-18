@@ -375,6 +375,9 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 // On touchend reset the touchZoom variable to false
                 zpdElement.data.touchZoom = false;
 
+                // On touchend reset the prevZoomDistance variable to default value
+                zpdElement.data.prevZoomDistance = null
+
                 if (zpdElement.data.state == 'pan' || zpdElement.data.state == 'drag') {
 
                     // quit pan mode
@@ -527,7 +530,8 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                         // Case for pinch being closed, make the delta negative
                         if (zpdElement.data.prevZoomDistance > distance) delta = delta * -1;
 
-                        _handleZoomingEvent(event, zpdElement, delta);
+                        // Stop zooming event when distance equal to prevZoomDistance
+                        if (zpdElement.data.prevZoomDistance != distance) _handleZoomingEvent(event, zpdElement, delta);
                     }
 
                     // Store the distance between touch positions so we can compare the changes to see if it's getting larger or smaller.
