@@ -71,6 +71,10 @@ paper.zpd(function (err, paper) {
 
     true or false: enable or disable panning (default true)
 
+#### panDirections
+
+    "both" | "horizontal" | "vertical": determines which axes will support panning (default "both")
+
 #### drag
 
     true or false: enable or disable dragging (default false)
