@@ -784,7 +784,11 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                 case situationState.origin:
 
                     // back to origin location
-                    self.zoomTo(1, 1000);
+                    // animation durations are set to 1ms to avoid both animations and errors because of 0 duration animations.
+                    self.zoomTo(1, 1, null,
+                        function() {
+                            self.panTo(0,0,1); // set callback to panTo to also reset position
+                        });
 
                     // callback
                     if (callbackFunc) {
