@@ -713,7 +713,7 @@ SVGElement.prototype.getTransformToElement = SVGElement.prototype.getTransformTo
                     }
                     for (var prop2 in options) {
                         if (typeof options[prop2] === 'object') {
-                            if (typeof zpdOptions[prop2] !== 'object') {
+                            if (typeof zpdOptions[prop2] !== 'object' || zpdOptions[prop2] === null) {
                                 zpdOptions[prop2] = options[prop2];
                             }
                             for (var subprop2 in options[prop2]) {
